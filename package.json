@@ -1,0 +1,16 @@
+{
+  "name": "party-poopa-be",
+  "version": "0.0.1",
+  "main": "index.ts",
+  "scripts": {
+    "start": "tsx ."
+  },
+  "dependencies": {
+    "express": "^5.0.1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.9.3",
+    "tsx": "^4.19.2"
+  }
+}

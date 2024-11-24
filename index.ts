@@ -1,10 +1,16 @@
 import express from 'express';
+import { db } from 'db';
 
 const app = express();
 
 app.get('/', (req, res) => {
   res.send('Hello world!');
 });
+
+app.get('/db', async (req, res) => {
+  const data = await db.query('select * from admins');
+  res.json(data.rows);
+})
 
 const port = 3000;
 

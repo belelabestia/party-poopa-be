@@ -7,7 +7,9 @@
     "strict": true,
     "skipLibCheck": true,
     "paths": {
-      "db": ["./modules/db"],
+      "modules/*": ["./modules/*"],
+      "routes/*": ["./routes/*"],
+      "sql": ["./sql"],
       "config": ["./config"]
     }
   }

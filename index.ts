@@ -1,22 +1,12 @@
 import express from 'express';
-import { db } from 'db';
+import { addAdmin } from 'routes/admin';
+import { startServer } from 'modules/server';
+import { addMiddlewares } from 'modules/middleware';
+import { addHello } from 'routes/hello';
 
 const app = express();
 
-app.get('/', (req, res) => {
-  res.send('Hello world!');
-});
-
-app.get('/db', async (req, res) => {
-  const data = await db.query('select * from admins');
-  res.json(data.rows);
-})
-
-const port = 3000;
-
-const onStartup = () => {
-  console.log('Party Poopa backend service started.');
-  console.log(`Listening on port: ${port}.`);
-};
-
-app.listen(port, onStartup);
+addMiddlewares(app);
+addHello(app);
+addAdmin(app);
+startServer(app);

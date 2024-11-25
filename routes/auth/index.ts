@@ -1,15 +1,16 @@
 import { Express } from 'express';
 import { compare, hash } from 'bcryptjs';
-import { JwtPayload, sign, verify } from 'jsonwebtoken';
+import { sign } from 'jsonwebtoken';
 import { Request, Response } from 'modules/core';
 import { db } from 'modules/db';
 import * as rsp from 'modules/respond';
-import * as sql from 'sql';
 import { Admin } from 'modules/schema';
 import { jwt } from 'config';
+import * as sql from './sql';
 
 type Cookie = {
-  cookie: (name: string, token: string, options: { httpOnly: true }) => void
+  cookie: (name: string, token: string, options: { httpOnly: true }) => void,
+  clearCookie: (name: string) => void
 };
 
 const register = async (req: Request, res: Response) => {
@@ -32,7 +33,7 @@ const register = async (req: Request, res: Response) => {
 
   try {
     const passwordHash = await hash(password, 10);
-    await db.query(sql.admin.register, [username, passwordHash]);
+    await db.query(sql.register, [username, passwordHash]);
     respond.created('admin registered successfully');
   }
   catch (error) {
@@ -60,7 +61,7 @@ const login = async (req: Request, res: Response & Cookie) => {
   }
 
   try {
-    const { rows: [admin] } = await db.query<Admin>(sql.admin.login, [username]);
+    const { rows: [admin] } = await db.query<Admin>(sql.login, [username]);
 
     if (!admin) {
       console.log('wrong username, admin login failed', { username });
@@ -85,10 +86,18 @@ const login = async (req: Request, res: Response & Cookie) => {
     console.error('admin login failed', error);
     respond.internalServerError();
   }
-}
+};
+
+const logout = (req: Request, res: Response & Cookie) => {
+  const respond = rsp.init(res);
+  console.log('logging out');
+  res.clearCookie('token');
+  respond.noContent();
+};
 
 /** admin endpoints */
 export const addAdmin = (app: Express) => {
-  app.post('/admin/register', register);
-  app.post('/admin/login', login);
+  app.post('/auth/register', register);
+  app.post('/auth/login', login);
+  app.post('/auth/logout', logout);
 };

@@ -3,5 +3,8 @@ export type Request = {
   cookies: Record<string, string>
 };
 
-type Status = { json: (data: object) => void };
-export type Response = { status: (code: number) => Status };
+export type Response = {
+  status: (code: number) => Response,
+  json: (data: object) => void,
+  end: () => void
+};

@@ -3,7 +3,7 @@ import { authenticate } from 'modules/auth';
 import { Request, Response } from 'modules/core';
 import { db } from 'modules/db';
 import * as rsp from 'modules/respond';
-import * as sql from 'sql';
+import * as sql from './sql';
 
 const getPeople = async (req: Request, res: Response) => {
   console.log('getting all people');
@@ -14,7 +14,7 @@ const getPeople = async (req: Request, res: Response) => {
   const respond = rsp.init(res);
 
   try {
-    const { rows } = await db.query(sql.people.get);
+    const { rows } = await db.query(sql.get);
     respond.ok(rows);
   }
   catch (error) {

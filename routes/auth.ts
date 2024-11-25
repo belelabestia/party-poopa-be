@@ -1,12 +1,18 @@
 import { Express } from 'express';
 import { compare, hash } from 'bcryptjs';
-import { Req } from 'modules/core';
+import { JwtPayload, sign, verify } from 'jsonwebtoken';
+import { Request, Response } from 'modules/core';
 import { db } from 'modules/db';
 import * as rsp from 'modules/respond';
 import * as sql from 'sql';
 import { Admin } from 'modules/schema';
+import { jwt } from 'config';
 
-const register = async (req: Req, res: rsp.Response) => {
+type Cookie = {
+  cookie: (name: string, token: string, options: { httpOnly: true }) => void
+};
+
+const register = async (req: Request, res: Response) => {
   const { username, password } = req.body;
   const respond = rsp.init(res);
 
@@ -35,7 +41,7 @@ const register = async (req: Req, res: rsp.Response) => {
   }
 };
 
-const login = async (req: Req, res: rsp.Response) => {
+const login = async (req: Request, res: Response & Cookie) => {
   const { username, password } = req.body;
   const respond = rsp.init(res);
 
@@ -70,10 +76,13 @@ const login = async (req: Req, res: rsp.Response) => {
       return;
     }
 
-    respond.ok({ username: admin.username });
+    const token = sign({ username }, jwt.secret, { expiresIn: '1h' });
+    res.cookie('token', token, { httpOnly: true });
+
+    respond.ok({ message: 'login successful' });
   }
   catch (error) {
-    console.error('admin login failed');
+    console.error('admin login failed', error);
     respond.internalServerError();
   }
 }

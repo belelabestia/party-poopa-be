@@ -6,3 +6,7 @@ export const admin = {
   register: query('admin/register'),
   login: query('admin/login')
 };
+
+export const people = {
+  get: query('people/get')
+};

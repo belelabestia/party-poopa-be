@@ -1,5 +1,4 @@
-type Status = { json: (data: object) => void };
-export type Response = { status: (code: number) => Status };
+import { Response } from 'modules/core';
 
 export const init = (res: Response) => ({
   /** send a 'bad request' (400) response with a message */

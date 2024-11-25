@@ -2,4 +2,5 @@ import * as sql from 'modules/sql';
 
 const importQuery = sql.init(__dirname);
 
-export const get = importQuery('get');
+export const selectAll = importQuery('select-all');
+export const insert = importQuery('insert');

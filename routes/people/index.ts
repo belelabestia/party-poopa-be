@@ -23,6 +23,7 @@ const getPeople = async (req: Request, res: Response) => {
   }
 };
 
+/** add people endpoints */
 export const addPeople = (app: Express) => {
   app.get('/people', getPeople);
 };

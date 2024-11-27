@@ -96,7 +96,7 @@ const logout = (req: Request, res: Response & Cookie) => {
 };
 
 /** admin endpoints */
-export const addAdmin = (app: Express) => {
+export const addAuth = (app: Express) => {
   app.post('/auth/register', register);
   app.post('/auth/login', login);
   app.post('/auth/logout', logout);

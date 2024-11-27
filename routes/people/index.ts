@@ -8,8 +8,8 @@ import * as sql from './sql';
 const getAllPeople = async (req: Request, res: Response) => {
   console.log('getting all people');
 
-  const user = await authenticate(req, res);
-  if (!user) return;
+  const admin = await authenticate(req, res);
+  if (!admin) return;
 
   const respond = rsp.init(res);
 
@@ -26,18 +26,11 @@ const getAllPeople = async (req: Request, res: Response) => {
 const addPerson = async (req: Request, res: Response) => {
   console.log('adding person');
 
-  const user = await authenticate(req, res);
-  if (!user) return;
+  const admin = await authenticate(req, res);
+  if (!admin) return;
 
   const respond = rsp.init(res);
-  
   const { data } = req.body;
-
-  if (!data) {
-    console.log('no person data, rejecting request');
-    respond.badRequest('no person data');
-    return;
-  }
 
   try {
     await db.query(sql.insert, [data]);

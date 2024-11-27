@@ -1,5 +1,5 @@
 import express from 'express';
-import { addAdmin } from 'routes/auth';
+import { addAuth } from 'routes/auth';
 import { startServer } from 'modules/server';
 import { addMiddlewares } from 'modules/middleware';
 import { addHello } from 'routes/hello';
@@ -9,6 +9,6 @@ const app = express();
 
 addMiddlewares(app);
 addHello(app);
-addAdmin(app);
+addAuth(app);
 addPeople(app);
 startServer(app);

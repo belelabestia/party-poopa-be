@@ -1,4 +1,5 @@
 export type Request = {
+  params: Record<string, string>,
   body: Record<string, unknown>,
   cookies: Record<string, string>
 };

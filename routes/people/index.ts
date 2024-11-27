@@ -30,14 +30,53 @@ const addPerson = async (req: Request, res: Response) => {
   if (!admin) return;
 
   const respond = rsp.init(res);
-  const { data } = req.body;
+  const data = req.body.data;
 
   try {
-    await db.query(sql.insert, [data]);
-    respond.noContent();
+    const { rows } = await db.query(sql.insert, [data]);
+    respond.ok({ id: rows[0].id });
   }
   catch (error) {
     console.error('adding person failed', error);
+    respond.internalServerError();
+  }
+};
+
+const updatePerson = async (req: Request, res: Response) => {
+  console.log('updating person');
+
+  const admin = await authenticate(req, res);
+  if (!admin) return;
+
+  const respond = rsp.init(res);
+  const id = req.params.id;
+  const data = req.body.data;
+
+  try {
+    await db.query(sql.update, [id, data]);
+    respond.noContent();
+  }
+  catch (error) {
+    console.error('updating person failed', error);
+    respond.internalServerError();
+  }
+};
+
+const deletePerson = async (req: Request, res: Response) => {
+  console.log('deleting person');
+
+  const admin = await authenticate(req, res);
+  if (!admin) return;
+
+  const respond = rsp.init(res);
+  const id = req.params.id;
+
+  try {
+    await db.query(sql.$delete, [id]);
+    respond.noContent();
+  }
+  catch (error) {
+    console.error('updating person failed', error);
     respond.internalServerError();
   }
 };
@@ -46,4 +85,6 @@ const addPerson = async (req: Request, res: Response) => {
 export const addPeople = (app: Express) => {
   app.get('/people', getAllPeople);
   app.post('/people', addPerson);
+  app.put('/people/:id', updatePerson);
+  app.delete('/people/:id', deletePerson);
 };

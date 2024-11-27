@@ -1,9 +1,9 @@
-import { JwtPayload, verify } from 'jsonwebtoken';
+import { verify } from 'jsonwebtoken';
 import { jwt } from 'config';
 import { Request, Response } from 'modules/core';
 import * as rsp from 'modules/respond';
 
-const verifyJwt = (token: string): Promise<string | JwtPayload | undefined> => new Promise(resolve => verify(token, jwt.secret, (err, decoded) => resolve([err, decoded])));
+const verifyJwt = (token: string) => new Promise(resolve => verify(token, jwt.secret, (err, decoded) => resolve([err, decoded])));
 
 export const authenticate = async (req: Request, res: Response) => {
   const token = req.cookies.token;
@@ -18,8 +18,8 @@ export const authenticate = async (req: Request, res: Response) => {
   const admin = await verifyJwt(token);
 
   if (typeof admin !== 'object') {
-    console.warn('not handling some token cases');
-    respond.badRequest('not handling some token cases');
+    console.log('invalid token type');
+    respond.badRequest('invalid token type');
     return;
   }
 

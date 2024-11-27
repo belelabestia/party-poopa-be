@@ -33,8 +33,8 @@ const addPerson = async (req: Request, res: Response) => {
   const data = req.body.data;
 
   try {
-    const { rows } = await db.query(sql.insert, [data]);
-    respond.ok({ id: rows[0].id });
+    const { rows: [{ id }] } = await db.query(sql.insert, [data]);
+    respond.ok({ id });
   }
   catch (error) {
     console.error('adding person failed', error);

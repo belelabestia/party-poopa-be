@@ -4,7 +4,6 @@ import { sign } from 'jsonwebtoken';
 import { Request, Response } from 'modules/core';
 import { db } from 'modules/db';
 import * as rsp from 'modules/respond';
-import { Admin } from 'modules/schema';
 import { jwt } from 'config';
 import * as sql from './sql';
 
@@ -12,6 +11,8 @@ type Cookie = {
   cookie: (name: string, token: string, options: { httpOnly: true }) => void,
   clearCookie: (name: string) => void
 };
+
+type Admin = { password_hash: string };
 
 const register = async (req: Request, res: Response) => {
   const { username, password } = req.body;

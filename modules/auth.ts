@@ -3,9 +3,14 @@ import { jwt } from 'config';
 import { Request, Response } from 'modules/core';
 import * as rsp from 'modules/respond';
 
-const verifyJwt = (token: string) => new Promise(resolve => verify(token, jwt.secret, (err, decoded) => resolve([err, decoded])));
+type Admin = { username: string };
+type JwtResult = [Error | null, Admin | undefined];
+
+const verifyJwt = (token: string) => new Promise<JwtResult>(resolve => verify(token, jwt.secret, (err, decoded) => resolve([err, decoded as Admin])));
 
 export const authenticate = async (req: Request, res: Response) => {
+  console.log('authenticating request');
+
   const token = req.cookies.token;
   const respond = rsp.init(res);
 
@@ -15,13 +20,15 @@ export const authenticate = async (req: Request, res: Response) => {
     return;
   }
 
-  const admin = await verifyJwt(token);
+  const [error, admin] = await verifyJwt(token);
 
-  if (typeof admin !== 'object') {
-    console.log('invalid token type');
-    respond.badRequest('invalid token type');
+  if (error) {
+    console.log('token validation failed', { message: error.message });
+    respond.unauthorized(error.message);
     return;
   }
+
+  if (!admin) throw new Error('no decoded token');
 
   return admin;
 };

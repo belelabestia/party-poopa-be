@@ -1,6 +1,8 @@
-type Admin = { username: string, password: string };
+import * as err from 'modules/error';
 
-export const register = async (base: string, data: Admin) => {
+export type Admin = { username: string, password: string };
+
+export const register = async (data: Admin, base: string) => {
   console.log('calling register endpoint');
 
   try {
@@ -16,11 +18,11 @@ export const register = async (base: string, data: Admin) => {
   }
   catch (error) {
     console.error('register request failed', error);
-    return { error };
+    return { error: err.coalesce(error) };
   }
 };
 
-export const login = async (base: string, data: Admin) => {
+export const login = async (data: Admin, base: string) => {
   console.log('calling login endpoint');
 
   try {
@@ -35,6 +37,6 @@ export const login = async (base: string, data: Admin) => {
   }
   catch (error) {
     console.error('login request failed', error);
-    return { error };
+    return { error: err.coalesce(error) };
   }
 };

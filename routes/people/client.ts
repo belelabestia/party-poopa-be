@@ -6,7 +6,7 @@ type Person = {
   data: Json | null
 };
 
-export const getAllPeople = async (base: string, cookies: string[]) => {
+export const getAllPeople = async (cookies: string[], base: string) => {
   console.log('fetching all people');
 
   try {
@@ -27,7 +27,7 @@ export const getAllPeople = async (base: string, cookies: string[]) => {
   }
 };
 
-export const addPerson = async (base: string, data: Json | null, cookies: string[]) => {
+export const addPerson = async (data: Json | null, cookies: string[], base: string) => {
   console.log('adding person');
 
   try {
@@ -49,7 +49,7 @@ export const addPerson = async (base: string, data: Json | null, cookies: string
   }
 };
 
-export const updatePerson = async (base: string, id: number, data: Json | null, cookies: string[]) => {
+export const updatePerson = async (id: number, data: Json | null, cookies: string[], base: string) => {
   console.log('updating person');
 
   try {
@@ -68,7 +68,7 @@ export const updatePerson = async (base: string, id: number, data: Json | null, 
   }
 };
 
-export const deletePerson = async (base: string, id: number, cookies: string[]) => {
+export const deletePerson = async (id: number, cookies: string[], base: string) => {
   console.log('updating person');
 
   try {

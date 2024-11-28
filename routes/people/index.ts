@@ -30,7 +30,7 @@ const addPerson = async (req: Request, res: Response) => {
   if (!admin) return;
 
   const respond = rsp.init(res);
-  const data = req.body.data;
+  const data = req.body;
 
   try {
     const { rows: [{ id }] } = await db.query(sql.insert, [data]);
@@ -42,15 +42,14 @@ const addPerson = async (req: Request, res: Response) => {
   }
 };
 
-const updatePerson = async (req: Request, res: Response) => {
+const updatePerson = async (req: Request<'id', {}>, res: Response) => {
   console.log('updating person');
 
   const admin = await authenticate(req, res);
   if (!admin) return;
 
   const respond = rsp.init(res);
-  const id = req.params.id;
-  const data = req.body.data;
+  const { params: { id }, body: data } = req;
 
   try {
     await db.query(sql.update, [id, data]);
@@ -62,14 +61,14 @@ const updatePerson = async (req: Request, res: Response) => {
   }
 };
 
-const deletePerson = async (req: Request, res: Response) => {
+const deletePerson = async (req: Request<'id'>, res: Response) => {
   console.log('deleting person');
 
   const admin = await authenticate(req, res);
   if (!admin) return;
 
   const respond = rsp.init(res);
-  const id = req.params.id;
+  const { params: { id } } = req;
 
   try {
     await db.query(sql.$delete, [id]);

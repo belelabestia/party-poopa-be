@@ -2,6 +2,7 @@ import { verify } from 'jsonwebtoken';
 import { jwt } from 'config';
 import { Request, Response } from 'modules/core';
 import * as rsp from 'modules/respond';
+import * as err from 'modules/error';
 
 type Admin = { username: string };
 type JwtResult = [Error | null, Admin | undefined];
@@ -28,7 +29,7 @@ export const authenticate = async (req: Request, res: Response) => {
     return;
   }
 
-  if (!admin) throw new Error('no decoded token');
+  if (!admin) throw err.make('no decoded token');
 
   return admin;
 };

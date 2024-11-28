@@ -13,8 +13,9 @@ type Cookie = {
 };
 
 type Admin = { password_hash: string };
+type Credentials = { username: string, password: string };
 
-const register = async (req: Request, res: Response) => {
+const register = async (req: Request<void, Credentials>, res: Response) => {
   const { username, password } = req.body;
   const respond = rsp.init(res);
 
@@ -43,7 +44,7 @@ const register = async (req: Request, res: Response) => {
   }
 };
 
-const login = async (req: Request, res: Response & Cookie) => {
+const login = async (req: Request<void, Credentials>, res: Response & Cookie) => {
   const { username, password } = req.body;
   const respond = rsp.init(res);
 

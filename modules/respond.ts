@@ -1,4 +1,4 @@
-import { Response } from 'modules/core';
+import { Json, Response } from 'modules/core';
 
 export const init = (res: Response) => ({
   /** send a 'bad request' (400) response with a message */
@@ -11,7 +11,7 @@ export const init = (res: Response) => ({
   internalServerError: () => res.status(500).json({ message: 'Internal server error' }),
 
   /** send an 'ok' (200) response with a payload */
-  ok: (data: object) => res.status(200).json(data),
+  ok: (data: Json) => res.status(200).json(data),
 
   /** sent a 'no content' (204) response, use it to mark 'void' endpoints */
   noContent: () => res.status(204).end(),

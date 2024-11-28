@@ -19,10 +19,11 @@ export const getAllPeople = async (cookies: string[], base: string) => {
     });
 
     const people = await res.json() as Person[];
+    console.log('all people fetched');
     return { people };
   }
   catch (error) {
-    console.error('getting all people failed', error);
+    console.error('fetching all people failed', error);
     return { error: err.coalesce(error) };
   }
 };
@@ -41,6 +42,7 @@ export const addPerson = async (data: Json | null, cookies: string[], base: stri
     });
 
     const { id } = await res.json() as { id: number };
+    console.log('adding person succeded');
     return { id };
   }
   catch (error) {
@@ -61,6 +63,8 @@ export const updatePerson = async (id: number, data: Json | null, cookies: strin
       },
       body: data ? JSON.stringify(data) : undefined
     });
+
+    console.log('updating person succeded');
   }
   catch (error) {
     console.error('updating person failed', error);
@@ -79,6 +83,8 @@ export const deletePerson = async (id: number, cookies: string[], base: string) 
         'Cookie': cookies.join('; ')
       }
     });
+
+    console.log('updating person succeded');
   }
   catch (error) {
     console.error('updating person failed', error);

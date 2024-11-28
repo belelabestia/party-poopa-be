@@ -36,6 +36,7 @@ const register = async (req: Request<void, Credentials>, res: Response) => {
   try {
     const passwordHash = await hash(password, 10);
     await db.query(sql.register, [username, passwordHash]);
+    console.log('admin registered successfully');
     respond.created('admin registered successfully');
   }
   catch (error) {
@@ -81,7 +82,7 @@ const login = async (req: Request<void, Credentials>, res: Response & Cookie) =>
 
     const token = sign({ username }, jwt.secret, { expiresIn: '1h' });
     res.cookie('token', token, { httpOnly: true });
-
+    console.log('login successful');
     respond.ok({ message: 'login successful' });
   }
   catch (error) {

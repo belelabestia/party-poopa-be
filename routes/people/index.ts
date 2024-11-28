@@ -15,6 +15,7 @@ const getAllPeople = async (req: Request, res: Response) => {
 
   try {
     const { rows } = await db.query(sql.selectAll);
+    console.log('getting all people succeded');
     respond.ok(rows);
   }
   catch (error) {
@@ -34,6 +35,7 @@ const addPerson = async (req: Request, res: Response) => {
 
   try {
     const { rows: [{ id }] } = await db.query(sql.insert, [data]);
+    console.log('adding person succeded');
     respond.ok({ id });
   }
   catch (error) {
@@ -53,6 +55,7 @@ const updatePerson = async (req: Request<'id', {}>, res: Response) => {
 
   try {
     await db.query(sql.update, [id, data]);
+    console.log('updating person succeded');
     respond.noContent();
   }
   catch (error) {
@@ -72,6 +75,7 @@ const deletePerson = async (req: Request<'id'>, res: Response) => {
 
   try {
     await db.query(sql.$delete, [id]);
+    console.log('deleting person succeded');
     respond.noContent();
   }
   catch (error) {

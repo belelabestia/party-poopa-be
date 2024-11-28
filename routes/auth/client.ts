@@ -12,8 +12,8 @@ export const register = async (data: Admin, base: string) => {
       body: JSON.stringify(data)
     });
 
-    // todo: type this
     const payload = await res.json();
+    console.log('register request succeded');
     return { payload };
   }
   catch (error) {
@@ -33,6 +33,7 @@ export const login = async (data: Admin, base: string) => {
     });
 
     const cookies = res.headers.getSetCookie();
+    console.log('login request succeded');
     return { cookies };
   }
   catch (error) {

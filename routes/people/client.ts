@@ -1,4 +1,4 @@
-import { Json } from 'modules/core';
+import { Json } from 'modules/json';
 import * as err from 'modules/error';
 
 type Person = {

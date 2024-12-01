@@ -1,7 +1,7 @@
 import { Express } from 'express';
 import { compare, hash } from 'bcryptjs';
 import { sign } from 'jsonwebtoken';
-import { Request, Response } from 'modules/core';
+import { Request, Response } from 'modules/json';
 import { db } from 'modules/db';
 import * as rsp from 'modules/respond';
 import { jwt } from 'config';

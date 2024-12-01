@@ -1,6 +1,6 @@
 import { Express } from 'express';
 import { authenticate } from 'modules/auth';
-import { Request, Response } from 'modules/core';
+import { Request, Response } from 'modules/json';
 import { db } from 'modules/db';
 import * as rsp from 'modules/respond';
 import * as sql from './sql';

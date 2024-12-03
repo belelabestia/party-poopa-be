@@ -1,6 +1,6 @@
 import { verify } from 'jsonwebtoken';
 import { jwt } from 'config';
-import { Request, Response } from 'modules/json';
+import { Request, Response } from 'modules/server';
 import * as rsp from 'modules/respond';
 import * as err from 'modules/error';
 

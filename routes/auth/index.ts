@@ -1,14 +1,14 @@
 import { Express } from 'express';
 import { compare, hash } from 'bcryptjs';
 import { sign } from 'jsonwebtoken';
-import { Request, Response } from 'modules/json';
+import { Request, Response } from 'modules/server';
 import { db } from 'modules/db';
 import * as rsp from 'modules/respond';
 import { jwt } from 'config';
 import * as sql from './sql';
 
 type Cookie = {
-  cookie: (name: string, token: string, options: { httpOnly: true }) => void,
+  cookie: (name: string, token: string) => void,
   clearCookie: (name: string) => void
 };
 
@@ -16,9 +16,9 @@ type Admin = { password_hash: string };
 type Credentials = { username: string, password: string };
 
 const register = async (req: Request<void, Credentials>, res: Response) => {
-  const { username, password } = req.body;
   const respond = rsp.init(res);
 
+  const { username, password } = req.body;
   console.log('registering admin', { username });
 
   if (!username || !password) {
@@ -46,9 +46,9 @@ const register = async (req: Request<void, Credentials>, res: Response) => {
 };
 
 const login = async (req: Request<void, Credentials>, res: Response & Cookie) => {
-  const { username, password } = req.body;
   const respond = rsp.init(res);
-
+  
+  const { username, password } = req.body;
   console.log('logging admin in', { username });
 
   if (!username || !password) {
@@ -81,7 +81,7 @@ const login = async (req: Request<void, Credentials>, res: Response & Cookie) =>
     }
 
     const token = sign({ username }, jwt.secret, { expiresIn: '1h' });
-    res.cookie('token', token, { httpOnly: true });
+    res.cookie('token', token);
     console.log('login successful');
     respond.ok({ message: 'login successful' });
   }
@@ -93,6 +93,7 @@ const login = async (req: Request<void, Credentials>, res: Response & Cookie) =>
 
 const logout = (req: Request, res: Response & Cookie) => {
   const respond = rsp.init(res);
+
   console.log('logging out');
   res.clearCookie('token');
   respond.noContent();

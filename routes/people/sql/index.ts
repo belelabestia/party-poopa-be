@@ -2,7 +2,7 @@ import * as sql from 'modules/sql';
 
 const importQuery = sql.init(__dirname);
 
-export const selectAll = importQuery('select-all');
-export const insert = importQuery('insert');
-export const update = importQuery('update');
-export const $delete = importQuery('delete');
+export const getAllPeople = importQuery('get-all-people');
+export const createPerson = importQuery('create-person');
+export const updatePerson = importQuery('update-person');
+export const deletePerson = importQuery('delete-person');

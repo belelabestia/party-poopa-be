@@ -6,15 +6,14 @@ import * as rsp from 'modules/respond';
 import * as sql from './sql';
 
 const getAllPeople = async (req: Request, res: Response) => {
-  console.log('getting all people');
-
   const admin = await authenticate(req, res);
   if (!admin) return;
 
   const respond = rsp.init(res);
+  console.log('getting all people');
 
   try {
-    const { rows } = await db.query(sql.selectAll);
+    const { rows } = await db.query(sql.getAllPeople);
     console.log('getting all people succeded');
     respond.ok(rows);
   }
@@ -24,37 +23,35 @@ const getAllPeople = async (req: Request, res: Response) => {
   }
 };
 
-const addPerson = async (req: Request, res: Response) => {
-  console.log('adding person');
-
+const createPerson = async (req: Request, res: Response) => {
   const admin = await authenticate(req, res);
   if (!admin) return;
 
   const respond = rsp.init(res);
   const data = req.body;
+  console.log('create person');
 
   try {
-    const { rows: [{ id }] } = await db.query(sql.insert, [data]);
-    console.log('adding person succeded');
+    const { rows: [{ id }] } = await db.query(sql.createPerson, [data]);
+    console.log('crating person succeded');
     respond.ok({ id });
   }
   catch (error) {
-    console.error('adding person failed', error);
+    console.error('creating person failed', error);
     respond.internalServerError();
   }
 };
 
-const updatePerson = async (req: Request<'id', {}>, res: Response) => {
-  console.log('updating person');
-
+const updatePerson = async (req: Request<'id'>, res: Response) => {
   const admin = await authenticate(req, res);
   if (!admin) return;
 
   const respond = rsp.init(res);
   const { params: { id }, body: data } = req;
+  console.log('updating person');
 
   try {
-    await db.query(sql.update, [id, data]);
+    await db.query(sql.updatePerson, [id, data]);
     console.log('updating person succeded');
     respond.noContent();
   }
@@ -65,29 +62,27 @@ const updatePerson = async (req: Request<'id', {}>, res: Response) => {
 };
 
 const deletePerson = async (req: Request<'id'>, res: Response) => {
-  console.log('deleting person');
-
   const admin = await authenticate(req, res);
   if (!admin) return;
 
   const respond = rsp.init(res);
   const { params: { id } } = req;
+  console.log('deleting person');
 
   try {
-    await db.query(sql.$delete, [id]);
+    await db.query(sql.deletePerson, [id]);
     console.log('deleting person succeded');
     respond.noContent();
   }
   catch (error) {
-    console.error('updating person failed', error);
+    console.error('deleting person failed', error);
     respond.internalServerError();
   }
 };
 
-/** add people endpoints */
-export const addPeople = (app: Express) => {
+export const addPeopleEndpoints = (app: Express) => {
   app.get('/people', getAllPeople);
-  app.post('/people', addPerson);
+  app.post('/people', createPerson);
   app.put('/people/:id', updatePerson);
   app.delete('/people/:id', deletePerson);
 };

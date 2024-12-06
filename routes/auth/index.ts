@@ -1,10 +1,10 @@
+import { compare } from 'bcryptjs';
+import { jwt } from 'config';
 import { Express } from 'express';
-import { compare, hash } from 'bcryptjs';
 import { sign } from 'jsonwebtoken';
-import { Request, Response } from 'modules/server';
 import { db } from 'modules/db';
 import * as rsp from 'modules/respond';
-import { jwt } from 'config';
+import { Request, Response } from 'modules/server';
 import * as sql from './sql';
 
 type Cookie = {
@@ -15,41 +15,9 @@ type Cookie = {
 type Admin = { password_hash: string };
 type Credentials = { username: string, password: string };
 
-const register = async (req: Request<void, Credentials>, res: Response) => {
-  const respond = rsp.init(res);
-
-  const { username, password } = req.body;
-  console.log('registering admin', { username });
-
-  if (!username || !password) {
-    console.log('missing username or password, rejecting admin registration', { username });
-    respond.badRequest('username and password are required');
-    return;
-  }
-
-  if (typeof username !== 'string' || typeof password !== 'string') {
-    console.log('username or password in wrong format, rejecting admin registration', { username });
-    respond.badRequest('username and password must be strings');
-    return;
-  }
-
-  try {
-    const passwordHash = await hash(password, 10);
-    await db.query(sql.register, [username, passwordHash]);
-    console.log('admin registered successfully');
-    respond.created('admin registered successfully');
-  }
-  catch (error) {
-    console.error('error registering admin', error);
-    respond.internalServerError();
-  }
-};
-
 const login = async (req: Request<void, Credentials>, res: Response & Cookie) => {
   const respond = rsp.init(res);
-  
   const { username, password } = req.body;
-  console.log('logging admin in', { username });
 
   if (!username || !password) {
     console.log('missing username or password, rejecting admin login', { username });
@@ -63,8 +31,10 @@ const login = async (req: Request<void, Credentials>, res: Response & Cookie) =>
     return;
   }
 
+  console.log('logging admin in', { username });
+
   try {
-    const { rows: [admin] } = await db.query<Admin>(sql.login, [username]);
+    const { rows: [admin] } = await db.query<Admin>(sql.getAdminByUsername, [username]);
 
     if (!admin) {
       console.log('wrong username, admin login failed', { username });
@@ -93,15 +63,12 @@ const login = async (req: Request<void, Credentials>, res: Response & Cookie) =>
 
 const logout = (req: Request, res: Response & Cookie) => {
   const respond = rsp.init(res);
-
   console.log('logging out');
   res.clearCookie('token');
   respond.noContent();
 };
 
-/** admin endpoints */
-export const addAuth = (app: Express) => {
-  app.post('/auth/register', register);
+export const addAuthEndpoints = (app: Express) => {
   app.post('/auth/login', login);
   app.post('/auth/logout', logout);
 };

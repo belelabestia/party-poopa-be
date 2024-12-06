@@ -1,14 +1,14 @@
 import express from 'express';
-import { addAuth } from 'routes/auth';
+import { addAuthEndpoints } from 'routes/auth';
 import { startServer } from 'modules/server';
 import { addMiddlewares } from 'modules/middleware';
-import { addHello } from 'routes/hello';
-import { addPeople } from 'routes/people';
+import { addHelloEndpoints } from 'routes/hello';
+import { addPeopleEndpoints } from 'routes/people';
 
 const app = express();
 
 addMiddlewares(app);
-addHello(app);
-addAuth(app);
-addPeople(app);
+addHelloEndpoints(app);
+addAuthEndpoints(app);
+addPeopleEndpoints(app);
 startServer(app);

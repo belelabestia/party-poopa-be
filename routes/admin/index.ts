@@ -18,7 +18,7 @@ const getAllAdmins = async (req: Request, res: Response) => {
 
   try {
     const { rows } = await db.query(sql.getAllAdmins);
-    console.log('getting all people succeded');
+    console.log('getting all admins succeded');
     respond.ok(rows);
   }
   catch (error) {
@@ -105,8 +105,8 @@ const deleteAdmin = async (req: Request<'id'>, res: Response) => {
 };
 
 export const addAdminEndpoints = (app: Express) => {
+  app.get('/admin', getAllAdmins);
   app.post('/admin', createAdmin);
   app.put('/admin/:id', updateAdmin);
-  app.get('/admin', getAllAdmins);
   app.delete('/admin/:id', deleteAdmin);
 };

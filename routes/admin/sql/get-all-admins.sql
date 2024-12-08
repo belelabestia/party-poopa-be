@@ -1,1 +1,1 @@
-select * from admins;
+select id, username from admins;

@@ -10,7 +10,7 @@ type CreateBody = { username: string, password: string };
 type UpdateBody = { username?: string, password?: string };
 
 const getAllAdmins = async (req: Request, res: Response) => {
-  const admin = authenticate(req, res);
+  const admin = await authenticate(req, res);
   if (!admin) return;
 
   const respond = rsp.init(res);
@@ -61,7 +61,7 @@ const createAdmin = async (req: Request<void, CreateBody>, res: Response) => {
 };
 
 const updateAdmin = async (req: Request<'id', UpdateBody>, res: Response) => {
-  const admin = authenticate(req, res);
+  const admin = await authenticate(req, res);
   if (!admin) return;
 
   const respond = rsp.init(res);
@@ -87,7 +87,7 @@ const updateAdmin = async (req: Request<'id', UpdateBody>, res: Response) => {
 };
 
 const deleteAdmin = async (req: Request<'id'>, res: Response) => {
-  const admin = authenticate(req, res);
+  const admin = await authenticate(req, res);
   if (!admin) return;
 
   const respond = rsp.init(res);

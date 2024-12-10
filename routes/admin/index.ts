@@ -67,7 +67,10 @@ const updateAdmin = async (req: Request<'id', UpdateBody>, res: Response) => {
   const respond = rsp.init(res);
   const { params: { id }, body: { username, password } } = req;
 
-  if ((username && typeof username !== 'string') || (password && typeof password !== 'string')) {
+  if (
+    (username && typeof username !== 'string') ||
+    (password && typeof password !== 'string')
+  ) {
     console.log('username or password in wrong format, rejecting admin update');
     respond.badRequest('username and password must be strings');
     return;

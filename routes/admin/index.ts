@@ -48,8 +48,8 @@ const createAdmin = async (req: Request<void, CredentialsBody>, res: Response) =
   console.log('creating admin', { username });
 
   try {
-    const passwordHash = await hash(password, 10);
-    const { rows: [{ id }] } = await db.query(sql.createAdmin, [username, passwordHash]);
+    const hashed = await hash(password, 10);
+    const { rows: [{ id }] } = await db.query(sql.createAdmin, [username, hashed]);
     console.log('admin created successfully');
     respond.ok({ id });
   }
@@ -116,7 +116,8 @@ const updateAdminPassword = async (req: Request<'id', PasswordBody>, res: Respon
   console.log('udpating password');
 
   try {
-    await db.query(sql.updateAdminPassword, [id, password]);
+    const hashed = await hash(password, 10);
+    await db.query(sql.updateAdminPassword, [id, hashed]);
     respond.noContent();
   }
   catch (error) {

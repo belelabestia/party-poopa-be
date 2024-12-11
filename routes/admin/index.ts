@@ -6,16 +6,13 @@ import * as rsp from 'modules/respond';
 import * as sql from './sql';
 import { authenticate } from 'modules/auth';
 
-type CreateBody = { username: string, password: string };
-type UpdateBody = { username?: string, password?: string };
-
 const getAllAdmins = async (req: Request, res: Response) => {
   const admin = await authenticate(req, res);
   if (!admin) return;
-
+  
   const respond = rsp.init(res);
   console.log('getting all admins');
-
+  
   try {
     const { rows } = await db.query(sql.getAllAdmins);
     console.log('getting all admins succeded');
@@ -27,7 +24,9 @@ const getAllAdmins = async (req: Request, res: Response) => {
   }
 };
 
-const createAdmin = async (req: Request<void, CreateBody>, res: Response) => {
+type CredentialsBody = { username: string, password: string };
+
+const createAdmin = async (req: Request<void, CredentialsBody>, res: Response) => {
   const admin = await authenticate(req, res);
   if (!admin) return;
 
@@ -41,7 +40,7 @@ const createAdmin = async (req: Request<void, CreateBody>, res: Response) => {
   }
 
   if (typeof username !== 'string' || typeof password !== 'string') {
-    console.log('username or password in wrong format, rejecting admin creation');
+    console.log('wrong username or password format, rejecting admin creation');
     respond.badRequest('username and password must be strings');
     return;
   }
@@ -60,31 +59,68 @@ const createAdmin = async (req: Request<void, CreateBody>, res: Response) => {
   }
 };
 
-const updateAdmin = async (req: Request<'id', UpdateBody>, res: Response) => {
+type UsernameBody = { username: string };
+
+const updateAdminUsername = async (req: Request<'id', UsernameBody>, res: Response) => {
   const admin = await authenticate(req, res);
   if (!admin) return;
 
   const respond = rsp.init(res);
-  const { params: { id }, body: { username, password } } = req;
+  const { params: { id }, body: { username } } = req;
 
-  if (
-    (username && typeof username !== 'string') ||
-    (password && typeof password !== 'string')
-  ) {
-    console.log('username or password in wrong format, rejecting admin update');
-    respond.badRequest('username and password must be strings');
+  if (!username) {
+    console.log('missing username, rejecting update');
+    respond.badRequest('missing username');
     return;
   }
 
-  console.log('updating admin');
+  if (typeof username !== 'string') {
+    console.log('wrong username format, rejecting update');
+    respond.badRequest('username must be a string');
+    return;
+  }
+
+  console.log('udpating username');
 
   try {
-    const passwordHash = password && await hash(password, 10);
-    await db.query(sql.updateAdmin, [username, passwordHash, id]);
+    await db.query(sql.updateAdminUsername, [id, username]);
     respond.noContent();
   }
   catch (error) {
-    console.error('error updating admin');
+    console.error('updating username failed', error);
+    respond.internalServerError();
+  }
+};
+
+type PasswordBody = { password: string };
+
+const updateAdminPassword = async (req: Request<'id', PasswordBody>, res: Response) => {
+  const admin = await authenticate(req, res);
+  if (!admin) return;
+
+  const respond = rsp.init(res);
+  const { params: { id }, body: { password } } = req;
+
+  if (!password) {
+    console.log('missing password, rejecting update');
+    respond.badRequest('missing password');
+    return;
+  }
+
+  if (typeof password !== 'string') {
+    console.log('wrong password format, rejecting update');
+    respond.badRequest('password must be a string');
+    return;
+  }
+
+  console.log('udpating password');
+
+  try {
+    await db.query(sql.updateAdminPassword, [id, password]);
+    respond.noContent();
+  }
+  catch (error) {
+    console.error('updating password failed', error);
     respond.internalServerError();
   }
 };
@@ -102,7 +138,7 @@ const deleteAdmin = async (req: Request<'id'>, res: Response) => {
     respond.noContent();
   }
   catch (error) {
-    console.error('error updating admin');
+    console.error('error deleting admin', error);
     respond.internalServerError();
   }
 };
@@ -110,6 +146,7 @@ const deleteAdmin = async (req: Request<'id'>, res: Response) => {
 export const addAdminEndpoints = (app: Express) => {
   app.get('/admin', getAllAdmins);
   app.post('/admin', createAdmin);
-  app.put('/admin/:id', updateAdmin);
+  app.put('/admin/:id/username', updateAdminUsername);
+  app.put('/admin/:id/password', updateAdminPassword);
   app.delete('/admin/:id', deleteAdmin);
 };

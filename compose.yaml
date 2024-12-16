@@ -1,0 +1,5 @@
+services:
+  party-poopa-be:
+    build: .
+    image: party-poopa-be
+    restart: unless-stopped

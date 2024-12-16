@@ -5,9 +5,9 @@ import * as rsp from 'modules/respond';
 import * as err from 'modules/error';
 
 type Admin = { username: string };
-type JwtResult = [Error | null, Admin | undefined];
+type JwtResult = [Error | null, Admin | null];
 
-const verifyJwt = (token: string) => new Promise<JwtResult>(resolve => verify(token, jwt.secret, (err, decoded) => resolve([err, decoded as Admin])));
+const verifyJwt = (token: string) => new Promise<JwtResult>(resolve => verify(token, jwt.secret, (err, decoded) => resolve([err, decoded as Admin ?? null])));
 
 export const authenticate = async (req: Request, res: Response) => {
   console.log('authenticating request');

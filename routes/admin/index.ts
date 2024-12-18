@@ -9,10 +9,10 @@ import { authenticate } from 'modules/auth';
 const getAllAdmins = async (req: Request, res: Response) => {
   const admin = await authenticate(req, res);
   if (!admin) return;
-  
+
   const respond = rsp.init(res);
   console.log('getting all admins');
-  
+
   try {
     const { rows } = await db.query(sql.getAllAdmins);
     console.log('getting all admins succeded');
@@ -54,6 +54,17 @@ const createAdmin = async (req: Request<void, CredentialsBody>, res: Response) =
     respond.ok({ id });
   }
   catch (error) {
+    if (
+      typeof error === 'object' &&
+      error !== null &&
+      'constraint' in error &&
+      error.constraint === 'admins_username_key'
+    ) {
+      console.log('duplicate username');
+      respond.badRequest('duplicate username');
+      return;
+    }
+
     console.error('error creating admin', error);
     respond.internalServerError();
   }
@@ -87,6 +98,17 @@ const updateAdminUsername = async (req: Request<'id', UsernameBody>, res: Respon
     respond.noContent();
   }
   catch (error) {
+    if (
+      typeof error === 'object' &&
+      error !== null &&
+      'constraint' in error &&
+      error.constraint === 'admins_username_key'
+    ) {
+      console.log('duplicate username');
+      respond.badRequest('duplicate username');
+      return;
+    }
+
     console.error('updating username failed', error);
     respond.internalServerError();
   }

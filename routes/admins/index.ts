@@ -15,7 +15,7 @@ const getAllAdmins = async (req: Request, res: Response) => {
 
   try {
     const { rows } = await db.query(sql.getAllAdmins);
-    console.log('getting all admins succeded');
+    console.log('getting all admins succeeded');
     respond.ok(rows);
   }
   catch (error) {
@@ -24,7 +24,7 @@ const getAllAdmins = async (req: Request, res: Response) => {
   }
 };
 
-type CredentialsBody = { username: string, password: string };
+type CredentialsBody = { username?: unknown, password?: unknown };
 
 const createAdmin = async (req: Request<void, CredentialsBody>, res: Response) => {
   const admin = await authenticate(req, res);
@@ -70,7 +70,7 @@ const createAdmin = async (req: Request<void, CredentialsBody>, res: Response) =
   }
 };
 
-type UsernameBody = { username: string };
+type UsernameBody = { username?: unknown };
 
 const updateAdminUsername = async (req: Request<'id', UsernameBody>, res: Response) => {
   const admin = await authenticate(req, res);
@@ -91,7 +91,7 @@ const updateAdminUsername = async (req: Request<'id', UsernameBody>, res: Respon
     return;
   }
 
-  console.log('udpating username');
+  console.log('updating username');
 
   try {
     await db.query(sql.updateAdminUsername, [id, username]);
@@ -114,7 +114,7 @@ const updateAdminUsername = async (req: Request<'id', UsernameBody>, res: Respon
   }
 };
 
-type PasswordBody = { password: string };
+type PasswordBody = { password?: unknown };
 
 const updateAdminPassword = async (req: Request<'id', PasswordBody>, res: Response) => {
   const admin = await authenticate(req, res);
@@ -167,7 +167,7 @@ const deleteAdmin = async (req: Request<'id'>, res: Response) => {
 };
 
 export const addAdminEndpoints = (app: Express) => {
-  app.get('/admin', getAllAdmins);
+  app.get('/admins', getAllAdmins);
   app.post('/admin', createAdmin);
   app.put('/admin/:id/username', updateAdminUsername);
   app.put('/admin/:id/password', updateAdminPassword);

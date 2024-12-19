@@ -4,7 +4,7 @@ import { startServer } from 'modules/server';
 import { addMiddlewares } from 'modules/middleware';
 import { addHelloEndpoints } from 'routes/hello';
 import { addPeopleEndpoints } from 'routes/people';
-import { addAdminEndpoints } from 'routes/admin';
+import { addAdminEndpoints } from 'routes/admins';
 
 const app = express();
 

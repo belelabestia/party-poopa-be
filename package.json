@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "main": "index.ts",
   "scripts": {
-    "start": "tsx ."
+    "start": "tsx watch ."
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

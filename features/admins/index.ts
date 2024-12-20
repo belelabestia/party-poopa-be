@@ -31,7 +31,7 @@ const createAdmin = async (req: Request, res: Response) => {
 
   const respond = rsp.init(res);
 
-  const data = parse.create(req, respond);
+  const data = parse.createAdmin(req, respond);
   if (!data) return;
 
   const { username, password } = data;
@@ -67,7 +67,7 @@ const updateAdminUsername = async (req: Request, res: Response) => {
 
   const respond = rsp.init(res);
   
-  const data = parse.updateUsername(req, respond);
+  const data = parse.updateAdminUsername(req, respond);
   if (!data) return;
 
   const { id, username } = data;
@@ -102,7 +102,7 @@ const updateAdminPassword = async (req: Request, res: Response) => {
 
   const respond = rsp.init(res);
   
-  const data = parse.updatePassword(req, respond);
+  const data = parse.updateAdminPassword(req, respond);
   if (!data) return;
 
   const { id, password } = data;
@@ -127,7 +127,7 @@ const deleteAdmin = async (req: Request, res: Response) => {
 
   const respond = rsp.init(res);
   
-  const data = parse.$delete(req, respond);
+  const data = parse.deleteAdmin(req, respond);
   if (!data) return;
 
   const { id } = data;

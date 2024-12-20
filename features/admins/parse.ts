@@ -4,7 +4,7 @@ import { Request } from '$/server';
 type Respond = ReturnType<typeof rsp.init>;
 type Create = { username?: unknown, password?: unknown };
 
-export const create = (req: Request, respond: Respond) => {
+export const createAdmin = (req: Request, respond: Respond) => {
   if (!req.body || typeof req.body !== 'object') {
     console.log('missing body, rejecting event creation');
     respond.badRequest('body is required');
@@ -30,7 +30,7 @@ export const create = (req: Request, respond: Respond) => {
 
 type Username = { username?: unknown };
 
-export const updateUsername = (req: Request, respond: Respond) => {
+export const updateAdminUsername = (req: Request, respond: Respond) => {
   if (!('id' in req.params) || typeof req.params.id !== 'string') {
     console.log('missing id, rejecting username update');
     respond.badRequest('id is required');
@@ -64,7 +64,7 @@ export const updateUsername = (req: Request, respond: Respond) => {
 
 type Password = { password?: unknown };
 
-export const updatePassword = (req: Request, respond: Respond) => {
+export const updateAdminPassword = (req: Request, respond: Respond) => {
   if (!('id' in req.params) || typeof req.params.id !== 'string') {
     console.log('missing id, rejecting password update');
     respond.badRequest('id is required');
@@ -96,7 +96,7 @@ export const updatePassword = (req: Request, respond: Respond) => {
   return { id, password };
 };
 
-export const $delete = (req: Request, respond: Respond) => {
+export const deleteAdmin = (req: Request, respond: Respond) => {
   if (!('id' in req.params) || typeof req.params.id !== 'string') {
     console.log('missing id, rejecting admin deletion');
     respond.badRequest('id is required');

@@ -1,12 +1,10 @@
 import * as rsp from '$/respond';
 import * as sql from './sql';
-import * as err from '$/error';
-import { hash } from 'bcryptjs';
+import * as parse from './parse';
 import { Express } from 'express';
 import { db } from '$/db';
 import { Request, Response } from '$/server';
 import { authenticate } from '$/auth';
-import { isDateString } from '$/date';
 
 const getAllEvents = async (req: Request, res: Response) => {
   const admin = await authenticate(req, res);
@@ -26,38 +24,16 @@ const getAllEvents = async (req: Request, res: Response) => {
   }
 };
 
-type CreateBody = { name?: unknown, date?: unknown };
-
-const createEvent = async (req: Request<void, CreateBody>, res: Response) => {
+const createEvent = async (req: Request, res: Response) => {
   const admin = await authenticate(req, res);
   if (!admin) return;
 
   const respond = rsp.init(res);
-  const { name, date } = req.body;
 
-  if (!name) {
-    console.log('missing name, rejecting event creation');
-    respond.badRequest('name is required');
-    return;
-  }
+  const data = parse.create(req, respond);
+  if (!data) return;
 
-  if (typeof name !== 'string') {
-    console.log('wrong name format, rejecting event creation');
-    respond.badRequest('name must be a string');
-    return;
-  }
-  
-  if (typeof date !== 'string') {
-    console.log('wrong date format, rejecting event creation');
-    respond.badRequest('date must be a string in the format YYYY-MM-DD');
-    return;
-  }
-
-  if (!isDateString(date)) {
-    console.log('invalid date format, rejecting event creation');
-    respond.badRequest('date must be a valid date string in the format YYYY-MM-DD');
-    return;
-  }
+  const { name, date } = data;
 
   console.log('creating event', { name });
 
@@ -72,58 +48,40 @@ const createEvent = async (req: Request<void, CreateBody>, res: Response) => {
   }
 };
 
-type UpdateBody = { id?: unknown, name?: unknown, date?: unknown };
-
-const updateEvent = async (req: Request<'id', UpdateBody>, res: Response) => {
+const updateEvent = async (req: Request, res: Response) => {
   const admin = await authenticate(req, res);
   if (!admin) return;
 
-  throw err.make('unimplemented');
-
   const respond = rsp.init(res);
-  const { params: { id }, body } = req;
+  
+  const data = parse.update(req, respond);
+  if (!data) return;
 
-  // if (!username) {
-  //   console.log('missing username, rejecting update');
-  //   respond.badRequest('missing username');
-  //   return;
-  // }
+  const { id, name, date } = data;
 
-  // if (typeof username !== 'string') {
-  //   console.log('wrong username format, rejecting update');
-  //   respond.badRequest('username must be a string');
-  //   return;
-  // }
-
-  console.log('udpating username');
+  console.log('udpating event', { name });
 
   try {
-    // await db.query(sql.updateEvent, [id, username]);
+    await db.query(sql.updateEvent, [id, name, date]);
     respond.noContent();
   }
   catch (error) {
-    if (
-      typeof error === 'object' &&
-      error !== null &&
-      'constraint' in error &&
-      error.constraint === 'admins_username_key'
-    ) {
-      console.log('duplicate username');
-      respond.badRequest('duplicate username');
-      return;
-    }
-
-    console.error('updating username failed', error);
+    console.error('updating event failed', error);
     respond.internalServerError();
   }
 };
 
-const deleteAdmin = async (req: Request<'id'>, res: Response) => {
+const deleteEvent = async (req: Request, res: Response) => {
   const admin = await authenticate(req, res);
   if (!admin) return;
 
   const respond = rsp.init(res);
-  const { id } = req.params;
+
+  const data = parse.$delete(req, respond);
+  if (!data) return;
+
+  const { id } = data;
+
   console.log('deleting admin');
 
   try {
@@ -140,5 +98,7 @@ export const addEventEndpoints = (app: Express) => {
   app.get('/events', getAllEvents);
   app.post('/event', createEvent);
   app.put('/event/:id', updateEvent);
-  app.delete('/event/:id', deleteAdmin);
+  app.delete('/event/:id', deleteEvent);
+
+  app.post('', (req) => { req.cookies });
 };

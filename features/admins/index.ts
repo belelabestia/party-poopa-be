@@ -1,9 +1,10 @@
+import * as rsp from '$/respond';
+import * as sql from './sql';
+import * as parse from './parse';
 import { hash } from 'bcryptjs';
 import { Express } from 'express';
 import { db } from '$/db';
 import { Request, Response } from '$/server';
-import * as rsp from '$/respond';
-import * as sql from './sql';
 import { authenticate } from '$/auth';
 
 const getAllAdmins = async (req: Request, res: Response) => {
@@ -24,26 +25,16 @@ const getAllAdmins = async (req: Request, res: Response) => {
   }
 };
 
-type CredentialsBody = { username?: unknown, password?: unknown };
-
-const createAdmin = async (req: Request<void, CredentialsBody>, res: Response) => {
+const createAdmin = async (req: Request, res: Response) => {
   const admin = await authenticate(req, res);
   if (!admin) return;
 
   const respond = rsp.init(res);
-  const { username, password } = req.body;
 
-  if (!username || !password) {
-    console.log('missing username or password, rejecting admin creation');
-    respond.badRequest('username and password are required');
-    return;
-  }
+  const data = parse.create(req, respond);
+  if (!data) return;
 
-  if (typeof username !== 'string' || typeof password !== 'string') {
-    console.log('wrong username or password format, rejecting admin creation');
-    respond.badRequest('username and password must be strings');
-    return;
-  }
+  const { username, password } = data;
 
   console.log('creating admin', { username });
 
@@ -70,31 +61,22 @@ const createAdmin = async (req: Request<void, CredentialsBody>, res: Response) =
   }
 };
 
-type UsernameBody = { username?: unknown };
-
-const updateAdminUsername = async (req: Request<'id', UsernameBody>, res: Response) => {
+const updateAdminUsername = async (req: Request, res: Response) => {
   const admin = await authenticate(req, res);
   if (!admin) return;
 
   const respond = rsp.init(res);
-  const { params: { id }, body: { username } } = req;
+  
+  const data = parse.updateUsername(req, respond);
+  if (!data) return;
 
-  if (!username) {
-    console.log('missing username, rejecting update');
-    respond.badRequest('missing username');
-    return;
-  }
-
-  if (typeof username !== 'string') {
-    console.log('wrong username format, rejecting update');
-    respond.badRequest('username must be a string');
-    return;
-  }
+  const { id, username } = data;
 
   console.log('updating username');
 
   try {
     await db.query(sql.updateAdminUsername, [id, username]);
+    console.log('username updated successfully');
     respond.noContent();
   }
   catch (error) {
@@ -114,32 +96,23 @@ const updateAdminUsername = async (req: Request<'id', UsernameBody>, res: Respon
   }
 };
 
-type PasswordBody = { password?: unknown };
-
-const updateAdminPassword = async (req: Request<'id', PasswordBody>, res: Response) => {
+const updateAdminPassword = async (req: Request, res: Response) => {
   const admin = await authenticate(req, res);
   if (!admin) return;
 
   const respond = rsp.init(res);
-  const { params: { id }, body: { password } } = req;
+  
+  const data = parse.updatePassword(req, respond);
+  if (!data) return;
 
-  if (!password) {
-    console.log('missing password, rejecting update');
-    respond.badRequest('missing password');
-    return;
-  }
-
-  if (typeof password !== 'string') {
-    console.log('wrong password format, rejecting update');
-    respond.badRequest('password must be a string');
-    return;
-  }
+  const { id, password } = data;
 
   console.log('udpating password');
 
   try {
     const hashed = await hash(password, 10);
     await db.query(sql.updateAdminPassword, [id, hashed]);
+    console.log('password updated successfully');
     respond.noContent();
   }
   catch (error) {
@@ -148,16 +121,22 @@ const updateAdminPassword = async (req: Request<'id', PasswordBody>, res: Respon
   }
 };
 
-const deleteAdmin = async (req: Request<'id'>, res: Response) => {
+const deleteAdmin = async (req: Request, res: Response) => {
   const admin = await authenticate(req, res);
   if (!admin) return;
 
   const respond = rsp.init(res);
-  const { id } = req.params;
+  
+  const data = parse.$delete(req, respond);
+  if (!data) return;
+
+  const { id } = data;
+
   console.log('deleting admin');
 
   try {
     await db.query(sql.deleteAdmin, [id]);
+    console.log('admin deleted successfully');
     respond.noContent();
   }
   catch (error) {

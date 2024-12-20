@@ -1,13 +1,10 @@
 import { Express } from 'express';
 import { Json } from './json';
 
-type P = string | unknown;
-type B = Json | unknown;
-
-export type Request<Params extends P = unknown, Body extends B = unknown> = {
-  params: Params extends string ? Record<Params, string> : {},
+export type Request = {
+  params: {},
   body: Body,
-  cookies: Record<string, string>
+  cookies: unknown
 };
 
 export type Response = {

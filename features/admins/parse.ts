@@ -2,7 +2,7 @@ import * as rsp from '$/respond';
 import { Request } from '$/server';
 
 type Respond = ReturnType<typeof rsp.init>;
-type Create = { username?: unknown, password?: unknown };
+type CreateBody = { username?: unknown, password?: unknown };
 
 export const createAdmin = (req: Request, respond: Respond) => {
   if (!req.body || typeof req.body !== 'object') {
@@ -11,7 +11,7 @@ export const createAdmin = (req: Request, respond: Respond) => {
     return;
   }
 
-  const { username, password } = req.body as Create;
+  const { username, password } = req.body as CreateBody;
 
   if (!username || !password) {
     console.log('missing username or password, rejecting admin creation');
@@ -28,7 +28,7 @@ export const createAdmin = (req: Request, respond: Respond) => {
   return { username, password };
 };
 
-type Username = { username?: unknown };
+type UpdateUsernameBody = { username?: unknown };
 
 export const updateAdminUsername = (req: Request, respond: Respond) => {
   if (!('id' in req.params) || typeof req.params.id !== 'string') {
@@ -45,7 +45,7 @@ export const updateAdminUsername = (req: Request, respond: Respond) => {
     return;
   }
 
-  const { username } = req.body as Username;
+  const { username } = req.body as UpdateUsernameBody;
 
   if (!username) {
     console.log('missing username, rejecting username update');
@@ -62,7 +62,7 @@ export const updateAdminUsername = (req: Request, respond: Respond) => {
   return { id, username };
 };
 
-type Password = { password?: unknown };
+type UpdatePasswordBody = { password?: unknown };
 
 export const updateAdminPassword = (req: Request, respond: Respond) => {
   if (!('id' in req.params) || typeof req.params.id !== 'string') {
@@ -79,7 +79,7 @@ export const updateAdminPassword = (req: Request, respond: Respond) => {
     return;
   }
 
-  const { password } = req.body as Password;
+  const { password } = req.body as UpdatePasswordBody;
 
   if (!password) {
     console.log('missing password, rejecting password update');

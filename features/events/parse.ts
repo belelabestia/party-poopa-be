@@ -5,7 +5,7 @@ import { isDateString } from '$/date';
 type Respond = ReturnType<typeof rsp.init>;
 type CreateBody = { name?: unknown, date?: unknown };
 
-export const create = (req: Request, respond: Respond) => {
+export const createEvent = (req: Request, respond: Respond) => {
   if (!req.body || typeof req.body !== 'object') {
     console.log('missing body, rejecting event creation');
     respond.badRequest('body is required');
@@ -45,7 +45,7 @@ export const create = (req: Request, respond: Respond) => {
 
 type UpdateBody = { id?: unknown, name?: unknown, date?: unknown };
 
-export const update = (req: Request, respond: Respond) => {
+export const updateEvent = (req: Request, respond: Respond) => {
   if (!('id' in req.params) || typeof req.params.id !== 'string') {
     console.log('missing id, rejecting event update');
     respond.badRequest('id is required');
@@ -91,7 +91,7 @@ export const update = (req: Request, respond: Respond) => {
   return { id, name, date };
 };
 
-export const $delete = (req: Request, respond: Respond) => {
+export const deleteEvent = (req: Request, respond: Respond) => {
   if (!('id' in req.params) || typeof req.params.id !== 'string') {
     console.log('missing id, rejecting event deletion');
     respond.badRequest('id is required');

@@ -30,7 +30,7 @@ const createEvent = async (req: Request, res: Response) => {
 
   const respond = rsp.init(res);
 
-  const data = parse.create(req, respond);
+  const data = parse.createEvent(req, respond);
   if (!data) return;
 
   const { name, date } = data;
@@ -54,7 +54,7 @@ const updateEvent = async (req: Request, res: Response) => {
 
   const respond = rsp.init(res);
   
-  const data = parse.update(req, respond);
+  const data = parse.updateEvent(req, respond);
   if (!data) return;
 
   const { id, name, date } = data;
@@ -77,7 +77,7 @@ const deleteEvent = async (req: Request, res: Response) => {
 
   const respond = rsp.init(res);
 
-  const data = parse.$delete(req, respond);
+  const data = parse.deleteEvent(req, respond);
   if (!data) return;
 
   const { id } = data;

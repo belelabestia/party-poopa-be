@@ -1,5 +1,5 @@
-import { Response } from 'modules/server';
-import { Json } from 'modules/json';
+import { Response } from '$/server';
+import { Json } from '$/json';
 
 export const init = (res: Response) => ({
   /** send a 'bad request' (400) response with a message */

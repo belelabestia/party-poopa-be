@@ -1,12 +1,12 @@
-import * as rsp from 'modules/respond';
+import * as rsp from '$/respond';
 import * as sql from './sql';
-import * as err from 'modules/error';
+import * as err from '$/error';
 import { hash } from 'bcryptjs';
 import { Express } from 'express';
-import { db } from 'modules/db';
-import { Request, Response } from 'modules/server';
-import { authenticate } from 'modules/auth';
-import { isDateString } from 'modules/date';
+import { db } from '$/db';
+import { Request, Response } from '$/server';
+import { authenticate } from '$/auth';
+import { isDateString } from '$/date';
 
 const getAllEvents = async (req: Request, res: Response) => {
   const admin = await authenticate(req, res);

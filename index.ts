@@ -1,10 +1,10 @@
 import express from 'express';
-import { addAuthEndpoints } from './features/auth';
-import { startServer } from 'modules/server';
-import { addMiddlewares } from 'modules/middleware';
-import { addHelloEndpoints } from './features/hello';
-import { addPeopleEndpoints } from './features/people';
-import { addAdminEndpoints } from './features/admins';
+import { addAuthEndpoints } from '@/auth';
+import { startServer } from '$/server';
+import { addMiddlewares } from '$/middleware';
+import { addHelloEndpoints } from '@/hello';
+import { addPeopleEndpoints } from '@/people';
+import { addAdminEndpoints } from '@/admins';
 
 const app = express();
 

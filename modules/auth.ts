@@ -1,8 +1,8 @@
 import { verify } from 'jsonwebtoken';
 import { jwt } from 'config';
-import { Request, Response } from 'modules/server';
-import * as rsp from 'modules/respond';
-import * as err from 'modules/error';
+import { Request, Response } from '$/server';
+import * as rsp from '$/respond';
+import * as err from '$/error';
 
 type Admin = { username: string };
 type JwtResult = [Error | null, Admin | null];

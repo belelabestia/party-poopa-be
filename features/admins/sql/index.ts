@@ -1,4 +1,4 @@
-import * as sql from 'modules/sql';
+import * as sql from '$/sql';
 
 const importQuery = sql.init(__dirname);
 

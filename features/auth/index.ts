@@ -2,9 +2,9 @@ import { compare } from 'bcryptjs';
 import { jwt } from 'config';
 import { Express } from 'express';
 import { sign } from 'jsonwebtoken';
-import { db } from 'modules/db';
-import * as rsp from 'modules/respond';
-import { Request, Response } from 'modules/server';
+import { db } from '$/db';
+import * as rsp from '$/respond';
+import { Request, Response } from '$/server';
 import * as sql from './sql';
 
 type Cookie = {

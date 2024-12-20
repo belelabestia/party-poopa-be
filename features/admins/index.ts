@@ -1,10 +1,10 @@
 import { hash } from 'bcryptjs';
 import { Express } from 'express';
-import { db } from 'modules/db';
-import { Request, Response } from 'modules/server';
-import * as rsp from 'modules/respond';
+import { db } from '$/db';
+import { Request, Response } from '$/server';
+import * as rsp from '$/respond';
 import * as sql from './sql';
-import { authenticate } from 'modules/auth';
+import { authenticate } from '$/auth';
 
 const getAllAdmins = async (req: Request, res: Response) => {
   const admin = await authenticate(req, res);

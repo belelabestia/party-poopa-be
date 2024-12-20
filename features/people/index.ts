@@ -1,8 +1,8 @@
 import { Express } from 'express';
-import { authenticate } from 'modules/auth';
-import { Request, Response } from 'modules/server';
-import { db } from 'modules/db';
-import * as rsp from 'modules/respond';
+import { authenticate } from '$/auth';
+import { Request, Response } from '$/server';
+import { db } from '$/db';
+import * as rsp from '$/respond';
 import * as sql from './sql';
 
 const getAllPeople = async (req: Request, res: Response) => {

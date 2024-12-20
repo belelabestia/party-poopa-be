@@ -1,11 +1,8 @@
-import getAllEvents from './get-all-events.sql';
-import createEvent from './create-event.sql';
-import updateEvent from './update-event.sql';
-import deleteEvent from './delete-event.sql';
+import * as sql from '$/sql';
 
-export {
-  getAllEvents,
-  createEvent,
-  updateEvent,
-  deleteEvent
-};
+const importQuery = sql.init(__dirname);
+
+export const getAllEvents = importQuery('get-all-events');
+export const createEvent = importQuery('create-event');
+export const updateEvent = importQuery('update-event');
+export const deleteEvent = importQuery('delete-event');

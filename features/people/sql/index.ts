@@ -1,11 +1,8 @@
-import getAllPeople from './get-all-people.sql';
-import createPerson from './create-person.sql';
-import updatePerson from './update-person.sql';
-import deletePerson from './delete-person.sql';
+import * as sql from '$/sql';
 
-export {
-  getAllPeople,
-  createPerson,
-  updatePerson,
-  deletePerson
-};
+const importQuery = sql.init(__dirname);
+
+export const getAllPeople = importQuery('get-all-people');
+export const createPerson = importQuery('create-person');
+export const updatePerson = importQuery('update-person');
+export const deletePerson = importQuery('delete-person');

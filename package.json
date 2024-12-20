@@ -3,8 +3,7 @@
   "version": "0.0.1",
   "main": "index.ts",
   "scripts": {
-    "start": "tsx .",
-    "build": "tsc && esbuild . --bundle --minify --platform=node --outfile=dist/index.js --loader:.sql=text"
+    "start": "tsx ."
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -21,7 +20,6 @@
     "@types/jsonwebtoken": "^9.0.7",
     "@types/node": "^22.9.3",
     "@types/pg": "^8.11.10",
-    "esbuild": "^0.24.1",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2"
   }

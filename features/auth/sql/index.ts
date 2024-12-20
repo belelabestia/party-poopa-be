@@ -1,3 +1,5 @@
-import getAdminByUsername from './get-admin-by-username.sql';
+import * as sql from '$/sql';
 
-export { getAdminByUsername };
+const importQuery = sql.init(__dirname);
+
+export const getAdminByUsername = importQuery('get-admin-by-username');

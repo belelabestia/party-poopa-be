@@ -42,12 +42,12 @@ const createPerson = async (req: Request, res: Response) => {
   }
 };
 
-const updatePerson = async (req: Request<'id'>, res: Response) => {
+const updatePerson = async (req: Request, res: Response) => {
   const admin = await authenticate(req, res);
   if (!admin) return;
 
   const respond = rsp.init(res);
-  const { params: { id }, body: data } = req;
+  const { params: { id }, body: data } = req as any; // todo: fix type
   console.log('updating person');
 
   try {
@@ -61,12 +61,12 @@ const updatePerson = async (req: Request<'id'>, res: Response) => {
   }
 };
 
-const deletePerson = async (req: Request<'id'>, res: Response) => {
+const deletePerson = async (req: Request, res: Response) => {
   const admin = await authenticate(req, res);
   if (!admin) return;
 
   const respond = rsp.init(res);
-  const { params: { id } } = req;
+  const { params: { id } } = req as any; // todo: fix type
   console.log('deleting person');
 
   try {

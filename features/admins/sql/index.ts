@@ -1,9 +1,13 @@
-import * as sql from '$/sql';
+import getAllAdmins from './get-all-admins.sql';
+import createAdmin from './create-admin.sql';
+import updateAdminUsername from './update-admin-username.sql';
+import updateAdminPassword from './update-admin-password.sql';
+import deleteAdmin from './delete-admin.sql';
 
-const importQuery = sql.init(__dirname);
-
-export const getAllAdmins = importQuery('get-all-admins');
-export const createAdmin = importQuery('create-admin');
-export const updateAdminUsername = importQuery('update-admin-username');
-export const updateAdminPassword = importQuery('update-admin-password');
-export const deleteAdmin = importQuery('delete-admin');
+export {
+  getAllAdmins,
+  createAdmin,
+  updateAdminUsername,
+  updateAdminPassword,
+  deleteAdmin
+};

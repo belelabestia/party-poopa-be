@@ -8,7 +8,7 @@
     "skipLibCheck": true,
     "paths": {
       "modules/*": ["./modules/*"],
-      "routes/*": ["./routes/*"],
+      "routes/*": ["features/*"],
       "sql": ["./sql"],
       "config": ["./config"]
     }

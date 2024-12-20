@@ -1,9 +1,10 @@
+import * as rsp from 'modules/respond';
+import * as sql from './sql';
+import * as err from 'modules/error';
 import { hash } from 'bcryptjs';
 import { Express } from 'express';
 import { db } from 'modules/db';
 import { Request, Response } from 'modules/server';
-import * as rsp from 'modules/respond';
-import * as sql from './sql';
 import { authenticate } from 'modules/auth';
 import { isDateString } from 'modules/date';
 
@@ -77,25 +78,27 @@ const updateEvent = async (req: Request<'id', UpdateBody>, res: Response) => {
   const admin = await authenticate(req, res);
   if (!admin) return;
 
+  throw err.make('unimplemented');
+
   const respond = rsp.init(res);
-  const { params: { id }, body: { username } } = req;
+  const { params: { id }, body } = req;
 
-  if (!username) {
-    console.log('missing username, rejecting update');
-    respond.badRequest('missing username');
-    return;
-  }
+  // if (!username) {
+  //   console.log('missing username, rejecting update');
+  //   respond.badRequest('missing username');
+  //   return;
+  // }
 
-  if (typeof username !== 'string') {
-    console.log('wrong username format, rejecting update');
-    respond.badRequest('username must be a string');
-    return;
-  }
+  // if (typeof username !== 'string') {
+  //   console.log('wrong username format, rejecting update');
+  //   respond.badRequest('username must be a string');
+  //   return;
+  // }
 
   console.log('udpating username');
 
   try {
-    await db.query(sql.updateEvent, [id, username]);
+    // await db.query(sql.updateEvent, [id, username]);
     respond.noContent();
   }
   catch (error) {

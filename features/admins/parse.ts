@@ -13,7 +13,7 @@ export const getAllAdminsResult = (result: QueryResult, respond: Respond) => {
   for (let i = 0; i < rows.length; i++) {
     const { id, username } = rows[i];
 
-    if (typeof id !== 'number' || Number.isNaN(id)) {
+    if (typeof id !== 'number' || Number.isNaN(id) || id < 1) {
       console.log('wrong id format, getting all admins failed');
       respond.internalServerError();
       return;
@@ -105,9 +105,9 @@ export const updateAdminUsernameRequest = (req: Request, respond: Respond) => {
   return { id, username };
 };
 
-type UpdatePasswordBody = { password: string };
+type UpdatePasswordRequest = { password: string };
 
-export const updateAdminPassword = (req: Request, respond: Respond) => {
+export const updateAdminPasswordRequest = (req: Request, respond: Respond) => {
   const id = Number(req.params.id);
 
   if (Number.isNaN(id)) {
@@ -122,7 +122,7 @@ export const updateAdminPassword = (req: Request, respond: Respond) => {
     return;
   }
 
-  const { password } = req.body as UpdatePasswordBody;
+  const { password } = req.body as UpdatePasswordRequest;
 
   if (!password) {
     console.log('missing password, rejecting password update');
@@ -139,7 +139,7 @@ export const updateAdminPassword = (req: Request, respond: Respond) => {
   return { id, password };
 };
 
-export const deleteAdmin = (req: Request, respond: Respond) => {
+export const deleteAdminRequest = (req: Request, respond: Respond) => {
   const id = Number(req.params.id);
 
   if (Number.isNaN(id)) {

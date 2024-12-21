@@ -14,9 +14,13 @@ const getAllEvents = async (req: Request, res: Response) => {
   console.log('getting all events');
 
   try {
-    const { rows } = await db.query(sql.getAllEvents);
+    const result = await db.query(sql.getAllEvents);
+
+    const events = parse.getAllEventsResult(result, respond);
+    if (!events) return;
+
     console.log('getting all events succeeded');
-    respond.ok(rows);
+    respond.ok(events);
   }
   catch (error) {
     console.error('error getting events', error);
@@ -30,7 +34,7 @@ const createEvent = async (req: Request, res: Response) => {
 
   const respond = rsp.init(res);
 
-  const data = parse.createEvent(req, respond);
+  const data = parse.createEventRequest(req, respond);
   if (!data) return;
 
   const { name, date } = data;
@@ -38,7 +42,11 @@ const createEvent = async (req: Request, res: Response) => {
   console.log('creating event', { name });
 
   try {
-    const { rows: [{ id }] } = await db.query(sql.createEvent, [name, date]);
+    const result = await db.query(sql.createEvent, [name, date]);
+
+    const id = parse.createEventResult(result, respond);
+    if (!id) return;
+
     console.log('event created successfully');
     respond.ok({ id });
   }
@@ -54,7 +62,7 @@ const updateEvent = async (req: Request, res: Response) => {
 
   const respond = rsp.init(res);
 
-  const data = parse.updateEvent(req, respond);
+  const data = parse.updateEventRequest(req, respond);
   if (!data) return;
 
   const { id, name, date } = data;
@@ -77,7 +85,7 @@ const deleteEvent = async (req: Request, res: Response) => {
 
   const respond = rsp.init(res);
 
-  const data = parse.deleteEvent(req, respond);
+  const data = parse.deleteEventRequest(req, respond);
   if (!data) return;
 
   const { id } = data;

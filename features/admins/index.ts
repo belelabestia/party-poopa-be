@@ -110,7 +110,7 @@ const updateAdminPassword = async (req: Request, res: Response) => {
 
   const respond = rsp.init(res);
 
-  const data = parse.updateAdminPassword(req, respond);
+  const data = parse.updateAdminPasswordRequest(req, respond);
   if (!data) return;
 
   const { id, password } = data;
@@ -135,7 +135,7 @@ const deleteAdmin = async (req: Request, res: Response) => {
 
   const respond = rsp.init(res);
 
-  const data = parse.deleteAdmin(req, respond);
+  const data = parse.deleteAdminRequest(req, respond);
   if (!data) return;
 
   const { id } = data;

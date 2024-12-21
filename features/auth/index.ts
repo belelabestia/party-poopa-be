@@ -13,12 +13,10 @@ type Cookie = {
   clearCookie: (name: string) => void
 };
 
-type Admin = { password_hash: string };
-
 const login = async (req: Request, res: Response & Cookie) => {
   const respond = rsp.init(res);
 
-  const data = parse.login(req, respond);
+  const data = parse.loginRequest(req, respond);
   if (!data) return;
 
   const { username, password } = data;
@@ -26,13 +24,10 @@ const login = async (req: Request, res: Response & Cookie) => {
   console.log('logging admin in', { username });
 
   try {
-    const { rows: [admin] } = await db.query<Admin>(sql.getAdminByUsername, [username]);
+    const result = await db.query(sql.getAdminByUsername, [username]);
 
-    if (!admin) {
-      console.log('wrong username, admin login failed', { username });
-      respond.unauthorized('wrong credentials');
-      return;
-    }
+    const admin = parse.loginResult(result, respond, username);
+    if (!admin) return;
 
     const passwordMatches = await compare(password, admin.password_hash);
 

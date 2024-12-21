@@ -1,17 +1,46 @@
 import * as rsp from '$/respond';
 import { Request } from '$/server';
+import { QueryResult } from 'pg';
 
 type Respond = ReturnType<typeof rsp.init>;
-type CreateBody = { username?: unknown, password?: unknown };
 
-export const createAdmin = (req: Request, respond: Respond) => {
+type GetAllAdminsResult = { id: number, username: string }[];
+
+export const getAllAdminsResult = (result: QueryResult, respond: Respond) => {
+  const rows = result.rows as GetAllAdminsResult;
+  const admins = [] as GetAllAdminsResult;
+
+  for (let i = 0; i < rows.length; i++) {
+    const { id, username } = rows[i];
+
+    if (typeof id !== 'number' || Number.isNaN(id)) {
+      console.log('wrong id format, getting all admins failed');
+      respond.internalServerError();
+      return;
+    }
+
+    if (typeof username !== 'string' || !username) {
+      console.log('wrong username format, getting all admins failed');
+      respond.internalServerError();
+      return;
+    }
+
+    admins.push({ id, username });
+  }
+
+  return admins;
+};
+
+type CreateAdminRequest = { username: string, password: string };
+
+export const createAdminRequest = (req: Request, respond: Respond) => {
   if (!req.body || typeof req.body !== 'object') {
     console.log('missing body, rejecting event creation');
     respond.badRequest('body is required');
     return;
   }
 
-  const { username, password } = req.body as CreateBody;
+  const { username, password } = req.body as CreateAdminRequest;
 
   if (!username || !password) {
     console.log('missing username or password, rejecting admin creation');
@@ -28,12 +57,26 @@ export const createAdmin = (req: Request, respond: Respond) => {
   return { username, password };
 };
 
-type UpdateUsernameBody = { username?: unknown };
+type CreateAdminResult = { id: number };
 
-export const updateAdminUsername = (req: Request<'id'>, respond: Respond) => {
+export const createAdminResult = (result: QueryResult, respond: Respond) => {
+  const { id } = result.rows[0] as CreateAdminResult;
+
+  if (typeof id !== 'number' || Number.isNaN(id) || id < 1) {
+    console.log('wrong id format, creating admin failed');
+    respond.internalServerError();
+    return;
+  }
+
+  return id;
+};
+
+type UpdateUsernameRequest = { username: string };
+
+export const updateAdminUsernameRequest = (req: Request, respond: Respond) => {
   const id = Number(req.params.id);
 
-  if (Number.isNaN(id)) {
+  if (Number.isNaN(id) || id < 1) {
     console.log('wrong id format, rejecting username update');
     respond.badRequest('id must be a number');
     return;
@@ -45,7 +88,7 @@ export const updateAdminUsername = (req: Request<'id'>, respond: Respond) => {
     return;
   }
 
-  const { username } = req.body as UpdateUsernameBody;
+  const { username } = req.body as UpdateUsernameRequest;
 
   if (!username) {
     console.log('missing username, rejecting username update');
@@ -62,9 +105,9 @@ export const updateAdminUsername = (req: Request<'id'>, respond: Respond) => {
   return { id, username };
 };
 
-type UpdatePasswordBody = { password?: unknown };
+type UpdatePasswordBody = { password: string };
 
-export const updateAdminPassword = (req: Request<'id'>, respond: Respond) => {
+export const updateAdminPassword = (req: Request, respond: Respond) => {
   const id = Number(req.params.id);
 
   if (Number.isNaN(id)) {
@@ -96,7 +139,7 @@ export const updateAdminPassword = (req: Request<'id'>, respond: Respond) => {
   return { id, password };
 };
 
-export const deleteAdmin = (req: Request<'id'>, respond: Respond) => {
+export const deleteAdmin = (req: Request, respond: Respond) => {
   const id = Number(req.params.id);
 
   if (Number.isNaN(id)) {

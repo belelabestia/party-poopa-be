@@ -15,9 +15,13 @@ const getAllAdmins = async (req: Request, res: Response) => {
   console.log('getting all admins');
 
   try {
-    const { rows } = await db.query(sql.getAllAdmins);
+    const result = await db.query(sql.getAllAdmins);
+
+    const admins = parse.getAllAdminsResult(result, respond);
+    if (!admins) return;
+
     console.log('getting all admins succeeded');
-    respond.ok(rows);
+    respond.ok(admins);
   }
   catch (error) {
     console.error('error getting admins', error);
@@ -31,7 +35,7 @@ const createAdmin = async (req: Request, res: Response) => {
 
   const respond = rsp.init(res);
 
-  const data = parse.createAdmin(req, respond);
+  const data = parse.createAdminRequest(req, respond);
   if (!data) return;
 
   const { username, password } = data;
@@ -40,7 +44,11 @@ const createAdmin = async (req: Request, res: Response) => {
 
   try {
     const hashed = await hash(password, 10);
-    const { rows: [{ id }] } = await db.query(sql.createAdmin, [username, hashed]);
+    const result = await db.query(sql.createAdmin, [username, hashed]);
+
+    const id = parse.createAdminResult(result, respond);
+    if (!id) return;
+
     console.log('admin created successfully');
     respond.ok({ id });
   }
@@ -67,7 +75,7 @@ const updateAdminUsername = async (req: Request, res: Response) => {
 
   const respond = rsp.init(res);
 
-  const data = parse.updateAdminUsername(req, respond);
+  const data = parse.updateAdminUsernameRequest(req, respond);
   if (!data) return;
 
   const { id, username } = data;

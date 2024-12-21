@@ -30,14 +30,14 @@ export const createAdmin = (req: Request, respond: Respond) => {
 
 type UpdateUsernameBody = { username?: unknown };
 
-export const updateAdminUsername = (req: Request, respond: Respond) => {
-  if (!('id' in req.params) || typeof req.params.id !== 'string') {
-    console.log('missing id, rejecting username update');
-    respond.badRequest('id is required');
+export const updateAdminUsername = (req: Request<'id'>, respond: Respond) => {
+  const id = Number(req.params.id);
+
+  if (Number.isNaN(id)) {
+    console.log('wrong id format, rejecting username update');
+    respond.badRequest('id must be a number');
     return;
   }
-
-  const { id } = req.params;
 
   if (!req.body || typeof req.body !== 'object') {
     console.log('missing body, rejecting username update');
@@ -64,14 +64,14 @@ export const updateAdminUsername = (req: Request, respond: Respond) => {
 
 type UpdatePasswordBody = { password?: unknown };
 
-export const updateAdminPassword = (req: Request, respond: Respond) => {
-  if (!('id' in req.params) || typeof req.params.id !== 'string') {
-    console.log('missing id, rejecting password update');
-    respond.badRequest('id is required');
+export const updateAdminPassword = (req: Request<'id'>, respond: Respond) => {
+  const id = Number(req.params.id);
+
+  if (Number.isNaN(id)) {
+    console.log('wrong id format, rejecting password update');
+    respond.badRequest('id must be a number');
     return;
   }
-
-  const { id } = req.params;
 
   if (!req.body || typeof req.body !== 'object') {
     console.log('missing body, rejecting password update');
@@ -96,12 +96,14 @@ export const updateAdminPassword = (req: Request, respond: Respond) => {
   return { id, password };
 };
 
-export const deleteAdmin = (req: Request, respond: Respond) => {
-  if (!('id' in req.params) || typeof req.params.id !== 'string') {
-    console.log('missing id, rejecting admin deletion');
-    respond.badRequest('id is required');
+export const deleteAdmin = (req: Request<'id'>, respond: Respond) => {
+  const id = Number(req.params.id);
+
+  if (Number.isNaN(id)) {
+    console.log('wrong id format, rejecting admin deletion');
+    respond.badRequest('id must be a number');
     return;
   }
 
-  return { id: req.params.id };
+  return { id };
 };

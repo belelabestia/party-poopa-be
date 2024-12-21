@@ -45,14 +45,14 @@ export const createEvent = (req: Request, respond: Respond) => {
 
 type UpdateBody = { id?: unknown, name?: unknown, date?: unknown };
 
-export const updateEvent = (req: Request, respond: Respond) => {
-  if (!('id' in req.params) || typeof req.params.id !== 'string') {
-    console.log('missing id, rejecting event update');
-    respond.badRequest('id is required');
+export const updateEvent = (req: Request<'id'>, respond: Respond) => {
+  const id = Number(req.params.id);
+
+  if (Number.isNaN(id)) {
+    console.log('wrong id format, rejecting event update');
+    respond.badRequest('id must be a number');
     return;
   }
-
-  const { id } = req.params;
 
   if (!req.body || typeof req.body !== 'object') {
     console.log('missing body, rejecting event update');
@@ -74,7 +74,7 @@ export const updateEvent = (req: Request, respond: Respond) => {
     return;
   }
 
-  if (!date) return { name };
+  if (!date) return { id, name };
 
   if (typeof date !== 'string') {
     console.log('wrong date format, rejecting event update');
@@ -91,12 +91,14 @@ export const updateEvent = (req: Request, respond: Respond) => {
   return { id, name, date };
 };
 
-export const deleteEvent = (req: Request, respond: Respond) => {
-  if (!('id' in req.params) || typeof req.params.id !== 'string') {
-    console.log('missing id, rejecting event deletion');
-    respond.badRequest('id is required');
+export const deleteEvent = (req: Request<'id'>, respond: Respond) => {
+  const id = Number(req.params.id);
+
+  if (Number.isNaN(id)) {
+    console.log('wrong id format, rejecting username update');
+    respond.badRequest('id must be a number');
     return;
   }
 
-  return { id: req.params.id };
+  return { id };
 };

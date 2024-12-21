@@ -53,7 +53,7 @@ const updateEvent = async (req: Request, res: Response) => {
   if (!admin) return;
 
   const respond = rsp.init(res);
-  
+
   const data = parse.updateEvent(req, respond);
   if (!data) return;
 
@@ -99,6 +99,4 @@ export const addEventEndpoints = (app: Express) => {
   app.post('/event', createEvent);
   app.put('/event/:id', updateEvent);
   app.delete('/event/:id', deleteEvent);
-
-  app.post('', (req) => { req.cookies });
 };

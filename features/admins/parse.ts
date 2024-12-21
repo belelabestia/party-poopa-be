@@ -6,147 +6,112 @@ type Respond = ReturnType<typeof rsp.init>;
 
 type GetAllAdminsResult = { id: number, username: string }[];
 
-export const getAllAdminsResult = (result: QueryResult, respond: Respond) => {
-  const rows = result.rows as GetAllAdminsResult;
-  const admins = [] as GetAllAdminsResult;
+export const getAllAdminsResult = (result: QueryResult) => {
+  const admins: GetAllAdminsResult = [];
 
-  for (let i = 0; i < rows.length; i++) {
-    const { id, username } = rows[i];
+  for (let i = 0; i < result.rows.length; i++) {
+    const row = result.rows[i] as unknown;
 
-    if (typeof id !== 'number' || Number.isNaN(id) || id < 1) {
-      console.log('wrong id format, getting all admins failed');
-      respond.internalServerError();
-      return;
-    }
+    if (typeof row !== 'object') return { error: 'row should be an object' };
+    if (!row) return { error: 'row should not be null' };
 
-    if (typeof username !== 'string' || !username) {
-      console.log('wrong username format, getting all admins failed');
-      respond.internalServerError();
-      return;
-    }
+    if ('id' in row === false) return { error: 'missing id field' };
+    const id = row.id;
+
+    if (typeof id !== 'number') return { error: 'id should be a number' };
+    if (Number.isNaN(id)) return { error: 'id should not be NaN' };
+    if (id < 1) return { error: 'id should be greater than 0' };
+
+    if ('username' in row === false) return { error: 'missing username field' };
+    const username = row.username;
+
+    if (typeof username !== 'string') return { error: 'username should be a string' };
+    if (!username) return { error: 'username should not be empty' };
 
     admins.push({ id, username });
   }
 
-  return admins;
+  return { admins };
 };
 
-type CreateAdminRequest = { username: string, password: string };
+export const createAdminRequest = (req: Request) => {
+  if (typeof req.body !== 'object') return { error: 'body should be an object' };
+  if (!req.body) return { error: 'body should not be null' };
 
-export const createAdminRequest = (req: Request, respond: Respond) => {
-  if (!req.body || typeof req.body !== 'object') {
-    console.log('missing body, rejecting event creation');
-    respond.badRequest('body is required');
-    return;
-  }
+  if ('username' in req.body === false) return { error: 'missing username field' };
+  if ('password' in req.body === false) return { error: 'missing password field' };
 
-  const { username, password } = req.body as CreateAdminRequest;
+  const { username, password } = req.body;
 
-  if (!username || !password) {
-    console.log('missing username or password, rejecting admin creation');
-    respond.badRequest('username and password are required');
-    return;
-  }
+  if (typeof username !== 'string') return { error: 'username should be a string' };
+  if (!username) return { error: 'username should not be empty' };
 
-  if (typeof username !== 'string' || typeof password !== 'string') {
-    console.log('wrong username or password format, rejecting admin creation');
-    respond.badRequest('username and password must be strings');
-    return;
-  }
+  if (typeof password !== 'string') return { error: 'password should be a string' };
+  if (!password) return { error: 'password should not be empty' };
 
-  return { username, password };
+  return { data: { username, password } };
 };
 
-type CreateAdminResult = { id: number };
+export const createAdminResult = (result: QueryResult) => {
+  const rows = result.rows as unknown[];
 
-export const createAdminResult = (result: QueryResult, respond: Respond) => {
-  const { id } = result.rows[0] as CreateAdminResult;
+  if (rows.length !== 1) return { error: 'result should be one row' };
+  const row = rows[0];
 
-  if (typeof id !== 'number' || Number.isNaN(id) || id < 1) {
-    console.log('wrong id format, creating admin failed');
-    respond.internalServerError();
-    return;
-  }
+  if (typeof row !== 'object') return { error: 'first row should be an object' };
+  if (!row) return { error: 'first row should not be null' };
 
-  return id;
+  if ('id' in row === false) return { error: 'missing id field' };
+  const id = row.id;
+
+  if (typeof id !== 'number') return { error: 'id should be a number' };
+  if (Number.isNaN(id)) return { error: 'id should not be NaN' };
+  if (id < 1) return { error: 'id should be greater than 0' };
+
+  return { id };
 };
 
-type UpdateUsernameRequest = { username: string };
-
-export const updateAdminUsernameRequest = (req: Request, respond: Respond) => {
+export const updateAdminUsernameRequest = (req: Request) => {
   const id = Number(req.params.id);
 
-  if (Number.isNaN(id) || id < 1) {
-    console.log('wrong id format, rejecting username update');
-    respond.badRequest('id must be a number');
-    return;
-  }
+  if (Number.isNaN(id)) return { error: 'id should be a number' };
+  if (id < 1) return { error: 'id should be greater than 0' };
 
-  if (!req.body || typeof req.body !== 'object') {
-    console.log('missing body, rejecting username update');
-    respond.badRequest('body is required');
-    return;
-  }
+  if (typeof req.body !== 'object') return { error: 'body should be an object' };
+  if (!req.body) return { error: 'body should not be null' };
 
-  const { username } = req.body as UpdateUsernameRequest;
+  if ('username' in req.body === false) return { error: 'missing username field' };
+  const username = req.body.username;
 
-  if (!username) {
-    console.log('missing username, rejecting username update');
-    respond.badRequest('username is required');
-    return;
-  }
+  if (typeof username !== 'string') return { error: 'username should be a string' };
+  if (!username) return { error: 'username should not be empty' };
 
-  if (typeof username !== 'string') {
-    console.log('wrong username format, rejecting username update');
-    respond.badRequest('username must be a string');
-    return;
-  }
-
-  return { id, username };
+  return { data: { id, username } };
 };
 
-type UpdatePasswordRequest = { password: string };
-
-export const updateAdminPasswordRequest = (req: Request, respond: Respond) => {
+export const updateAdminPasswordRequest = (req: Request) => {
   const id = Number(req.params.id);
 
-  if (Number.isNaN(id)) {
-    console.log('wrong id format, rejecting password update');
-    respond.badRequest('id must be a number');
-    return;
-  }
+  if (Number.isNaN(id)) return { error: 'id should be a number' };
+  if (id < 1) return { error: 'id should be greater than 0' };
 
-  if (!req.body || typeof req.body !== 'object') {
-    console.log('missing body, rejecting password update');
-    respond.badRequest('body is required');
-    return;
-  }
+  if (typeof req.body !== 'object') return { error: 'body should be an object' };
+  if (!req.body) return { error: 'body should not be null' };
 
-  const { password } = req.body as UpdatePasswordRequest;
+  if ('password' in req.body === false) return { error: 'missing password field' };
+  const password = req.body.password;
 
-  if (!password) {
-    console.log('missing password, rejecting password update');
-    respond.badRequest('password is required');
-    return;
-  }
+  if (typeof password !== 'string') return { error: 'password should be a string' };
+  if (!password) return { error: 'password should not be empty' };
 
-  if (typeof password !== 'string') {
-    console.log('wrong password format, rejecting password update');
-    respond.badRequest('password must be a string');
-    return;
-  }
-
-  return { id, password };
+  return { data: { id, password } };
 };
 
-export const deleteAdminRequest = (req: Request, respond: Respond) => {
+export const deleteAdminRequest = (req: Request) => {
   const id = Number(req.params.id);
 
-  if (Number.isNaN(id)) {
-    console.log('wrong id format, rejecting admin deletion');
-    respond.badRequest('id must be a number');
-    return;
-  }
+  if (Number.isNaN(id)) return { error: 'id should be a number' };
+  if (id < 1) return { error: 'id should be greater than 0' };
 
   return { id };
 };

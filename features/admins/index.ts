@@ -12,13 +12,17 @@ const getAllAdmins = async (req: Request, res: Response) => {
   if (!admin) return;
 
   const respond = rsp.init(res);
-  console.log('getting all admins');
+  console.log('getting all admins from db');
 
   try {
     const result = await db.query(sql.getAllAdmins);
+    const { error, admins } = parse.getAllAdminsResult(result);
 
-    const admins = parse.getAllAdminsResult(result, respond);
-    if (!admins) return;
+    if (error !== undefined) {
+      console.error('getting all admins from db failed', error);
+      respond.internalServerError();
+      return;
+    }
 
     console.log('getting all admins succeeded');
     respond.ok(admins);
@@ -35,19 +39,29 @@ const createAdmin = async (req: Request, res: Response) => {
 
   const respond = rsp.init(res);
 
-  const data = parse.createAdminRequest(req, respond);
-  if (!data) return;
+  const { error, data } = parse.createAdminRequest(req);
+  
+  if (error !== undefined) {
+    console.error('rejecting admin creation', error);
+    respond.badRequest(error);
+    return;
+  }
 
   const { username, password } = data;
 
-  console.log('creating admin', { username });
+  console.log('creating admin on db', { username });
 
   try {
     const hashed = await hash(password, 10);
     const result = await db.query(sql.createAdmin, [username, hashed]);
 
-    const id = parse.createAdminResult(result, respond);
-    if (!id) return;
+    const { error, id } = parse.createAdminResult(result);
+    
+    if (error !== undefined) {
+      console.error('error creating admin on db', error);
+      respond.internalServerError();
+      return;
+    }
 
     console.log('admin created successfully');
     respond.ok({ id });
@@ -75,8 +89,13 @@ const updateAdminUsername = async (req: Request, res: Response) => {
 
   const respond = rsp.init(res);
 
-  const data = parse.updateAdminUsernameRequest(req, respond);
-  if (!data) return;
+  const { error, data } = parse.updateAdminUsernameRequest(req);
+  
+  if (error !== undefined) {
+    console.error('rejecting username update', error);
+    respond.badRequest(error);
+    return;
+  }
 
   const { id, username } = data;
 
@@ -110,8 +129,13 @@ const updateAdminPassword = async (req: Request, res: Response) => {
 
   const respond = rsp.init(res);
 
-  const data = parse.updateAdminPasswordRequest(req, respond);
-  if (!data) return;
+  const { error, data } = parse.updateAdminPasswordRequest(req);
+
+  if (error !== undefined) {
+    console.error('rejecting password update', error);
+    respond.badRequest(error);
+    return;
+  }
 
   const { id, password } = data;
 
@@ -135,10 +159,13 @@ const deleteAdmin = async (req: Request, res: Response) => {
 
   const respond = rsp.init(res);
 
-  const data = parse.deleteAdminRequest(req, respond);
-  if (!data) return;
-
-  const { id } = data;
+  const { error, id } = parse.deleteAdminRequest(req);
+  
+  if (error !== undefined) {
+    console.error('rejecting admin deletion', error);
+    respond.badRequest(error);
+    return;
+  }
 
   console.log('deleting admin');
 

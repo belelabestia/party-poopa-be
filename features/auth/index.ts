@@ -16,8 +16,13 @@ type Cookie = {
 const login = async (req: Request, res: Response & Cookie) => {
   const respond = rsp.init(res);
 
-  const data = parse.loginRequest(req, respond);
-  if (!data) return;
+  const { error, data } = parse.loginRequest(req);
+  
+  if (error !== undefined) {
+    console.error('admin login failed', error);
+    respond.badRequest(error);
+    return;
+  }
 
   const { username, password } = data;
 
@@ -26,8 +31,19 @@ const login = async (req: Request, res: Response & Cookie) => {
   try {
     const result = await db.query(sql.getAdminByUsername, [username]);
 
-    const admin = parse.loginResult(result, respond, username);
-    if (!admin) return;
+    const { error, unauthorized, admin } = parse.loginResult(result);
+    
+    if (error !== undefined) {
+      console.error('admin login failed', error);
+      respond.internalServerError();
+      return;
+    }
+
+    if (unauthorized || unauthorized !== undefined) {
+      console.log('wrong credentials', { username });
+      respond.unauthorized('wrong credentials');
+      return;
+    }
 
     const passwordMatches = await compare(password, admin.password_hash);
 
@@ -40,7 +56,7 @@ const login = async (req: Request, res: Response & Cookie) => {
     const token = sign({ username }, jwt.secret, { expiresIn: '1h' });
     res.cookie('token', token);
     console.log('login successful');
-    respond.ok({ message: 'login successful' });
+    respond.noContent();
   }
   catch (error) {
     console.error('admin login failed', error);

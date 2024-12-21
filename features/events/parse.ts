@@ -5,7 +5,7 @@ import { QueryResult } from 'pg';
 
 type Respond = ReturnType<typeof rsp.init>;
 
-type GetAllEventsResult = { id: number, name: string, date: string }[];
+type GetAllEventsResult = { id: number, name: string, date?: string }[];
 
 export const getAllEventsResult = (result: QueryResult, respond: Respond) => {
   const rows = result.rows as GetAllEventsResult;
@@ -24,6 +24,11 @@ export const getAllEventsResult = (result: QueryResult, respond: Respond) => {
       console.log('wrong name format, getting all events failed');
       respond.internalServerError();
       return;
+    }
+
+    if (!date) {
+      events.push({ id, name });
+      continue;
     }
 
     if (typeof date !== 'string' || !isDateString(date)) {

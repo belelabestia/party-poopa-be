@@ -2,8 +2,6 @@ import * as rsp from '$/respond';
 import { Request } from '$/server';
 import { QueryResult } from 'pg';
 
-type Respond = ReturnType<typeof rsp.init>;
-
 type GetAllAdminsResult = { id: number, username: string }[];
 
 export const getAllAdminsResult = (result: QueryResult) => {

@@ -1,4 +1,3 @@
-import * as rsp from '$/respond';
 import { Request } from '$/server';
 import { QueryResult } from 'pg';
 

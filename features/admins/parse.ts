@@ -1,11 +1,8 @@
-import * as rsp from '$/respond';
 import { Request } from '$/server';
 import { QueryResult } from 'pg';
 
-type GetAllAdminsResult = { id: number, username: string }[];
-
 export const getAllAdminsResult = (result: QueryResult) => {
-  const admins: GetAllAdminsResult = [];
+  const admins = [];
 
   for (let i = 0; i < result.rows.length; i++) {
     const row = result.rows[i] as unknown;

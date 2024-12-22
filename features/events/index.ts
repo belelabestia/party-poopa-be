@@ -11,13 +11,17 @@ const getAllEvents = async (req: Request, res: Response) => {
   if (!admin) return;
 
   const respond = rsp.init(res);
-  console.log('getting all events');
+  console.log('getting all events from db');
 
   try {
     const result = await db.query(sql.getAllEvents);
+    const { error, events } = parse.getAllEventsResult(result);
 
-    const events = parse.getAllEventsResult(result, respond);
-    if (!events) return;
+    if (error !== undefined) {
+      console.error('getting all events from db failed', error);
+      respond.internalServerError();
+      return;
+    }
 
     console.log('getting all events succeeded');
     respond.ok(events);
@@ -34,8 +38,13 @@ const createEvent = async (req: Request, res: Response) => {
 
   const respond = rsp.init(res);
 
-  const data = parse.createEventRequest(req, respond);
-  if (!data) return;
+  const { error, data } = parse.createEventRequest(req);
+
+  if (error !== undefined) {
+    console.error('rejecting event creation', error);
+    respond.badRequest(error);
+    return;
+  }
 
   const { name, date } = data;
 
@@ -43,9 +52,13 @@ const createEvent = async (req: Request, res: Response) => {
 
   try {
     const result = await db.query(sql.createEvent, [name, date]);
+    const { error, id } = parse.createEventResult(result);
 
-    const id = parse.createEventResult(result, respond);
-    if (!id) return;
+    if (error !== undefined) {
+      console.error('error creating event', error);
+      respond.internalServerError();
+      return;
+    }
 
     console.log('event created successfully');
     respond.ok({ id });
@@ -62,8 +75,13 @@ const updateEvent = async (req: Request, res: Response) => {
 
   const respond = rsp.init(res);
 
-  const data = parse.updateEventRequest(req, respond);
-  if (!data) return;
+  const { error, data } = parse.updateEventRequest(req);
+
+  if (error !== undefined) {
+    console.error('rejecting event update', error);
+    respond.badRequest(error);
+    return;
+  }
 
   const { id, name, date } = data;
 
@@ -85,10 +103,13 @@ const deleteEvent = async (req: Request, res: Response) => {
 
   const respond = rsp.init(res);
 
-  const data = parse.deleteEventRequest(req, respond);
-  if (!data) return;
+  const { error, id } = parse.deleteEventRequest(req);
 
-  const { id } = data;
+  if (error !== undefined) {
+    console.error('rejecting event deletion', error);
+    respond.badRequest(error);
+    return;
+  }
 
   console.log('deleting admin');
 

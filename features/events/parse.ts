@@ -1,158 +1,112 @@
-import * as rsp from '$/respond';
 import { Request } from '$/server';
 import { isDateString } from '$/date';
 import { QueryResult } from 'pg';
 
-type Respond = ReturnType<typeof rsp.init>;
+export const getAllEventsResult = (result: QueryResult) => {
+  const events = [];
 
-type GetAllEventsResult = { id: number, name: string, date?: string }[];
+  for (let i = 0; i < result.rows.length; i++) {
+    const row = result.rows[i] as unknown;
 
-export const getAllEventsResult = (result: QueryResult, respond: Respond) => {
-  const rows = result.rows as GetAllEventsResult;
-  const events = [] as GetAllEventsResult;
+    if (typeof row !== 'object') return { error: 'row should be an object' };
+    if (!row) return { error: 'row should not be null' };
 
-  for (let i = 0; i < rows.length; i++) {
-    const { id, name, date } = rows[i];
+    if ('id' in row === false) return { error: 'missing id field' };
+    const id = row.id;
 
-    if (typeof id !== 'number' || Number.isNaN(id) || id < 1) {
-      console.log('wrong id format, getting all events failed');
-      respond.internalServerError();
-      return;
-    }
+    if (typeof id !== 'number') return { error: 'id should be a number' };
+    if (Number.isNaN(id)) return { error: 'id should not be NaN' };
+    if (id < 1) return { error: 'id should be greater than 0' };
 
-    if (typeof name !== 'string' || !name) {
-      console.log('wrong name format, getting all events failed');
-      respond.internalServerError();
-      return;
-    }
+    if ('name' in row === false) return { error: 'missing name field' };
+    const name = row.name;
 
-    if (!date) {
+    if (typeof name !== 'string') return { error: 'name should be a string' };
+    if (!name) return { error: 'name should not be empty' };
+
+    if ('date' in row === false) {
       events.push({ id, name });
       continue;
     }
 
-    if (typeof date !== 'string' || !isDateString(date)) {
-      console.log('wrong date format, getting all events failed');
-      respond.internalServerError();
-      return;
-    }
+    const date = row.date;
+
+    if (typeof date !== 'string') return { error: 'date should be a string' };
+    if (!isDateString(date)) return { error: 'date should be a valid date string' };
 
     events.push({ id, name, date });
   }
 
-  return events;
+  return { events };
 };
 
-type CreateEventRequest = { name: string, date?: string };
+export const createEventRequest = (req: Request) => {
+  if (typeof req.body !== 'object') return { error: 'body should be an object' };
+  if (!req.body) return { error: 'body should not be null' };
 
-export const createEventRequest = (req: Request, respond: Respond) => {
-  if (!req.body || typeof req.body !== 'object') {
-    console.log('missing body, rejecting event creation');
-    respond.badRequest('body is required');
-    return;
-  }
+  if ('name' in req.body === false) return { error: 'missing name field' };
+  const name = req.body.name;
 
-  const { name, date } = req.body as CreateEventRequest;
+  if (typeof name !== 'string') return { error: 'name should be a string' };
+  if (!name) return { error: 'name should not be empty' };
 
-  if (!name) {
-    console.log('missing name, rejecting event creation');
-    respond.badRequest('name is required');
-    return;
-  }
+  if ('date' in req.body === false) return { data: { name } };
+  const date = req.body.date;
 
-  if (typeof name !== 'string') {
-    console.log('wrong name format, rejecting event creation');
-    respond.badRequest('name must be a string');
-    return;
-  }
+  if (typeof date !== 'string') return { error: 'date should be a string' };
+  if (!isDateString(date)) return { error: 'date should be a valid date string in the format YYYY-MM-DD' };
 
-  if (!date) return { name };
-
-  if (typeof date !== 'string') {
-    console.log('wrong date format, rejecting event creation');
-    respond.badRequest('date must be a string in the format YYYY-MM-DD');
-    return;
-  }
-
-  if (!isDateString(date)) {
-    console.log('invalid date format, rejecting event creation');
-    respond.badRequest('date must be a valid date string in the format YYYY-MM-DD');
-    return;
-  }
-
-  return { name, date };
+  return { data: { name, date } };
 };
 
-type CreateEventResult = { id: number };
+export const createEventResult = (result: QueryResult) => {
+  const rows = result.rows as unknown[];
 
-export const createEventResult = (result: QueryResult, respond: Respond) => {
-  const { id } = result.rows[0] as CreateEventResult;
+  if (rows.length !== 1) return { error: 'result should be one row' };
+  const row = rows[0];
 
-  if (typeof id !== 'number' || Number.isNaN(id) || id < 1) {
-    console.log('wrong id format, creating event failed');
-    respond.internalServerError();
-    return;
-  }
+  if (typeof row !== 'object') return { error: 'first row should be an object' };
+  if (!row) return { error: 'first row should not be null' };
 
-  return id;
+  if ('id' in row === false) return { error: 'missing id field' };
+  const id = row.id;
+
+  if (typeof id !== 'number') return { error: 'id should be a number' };
+  if (Number.isNaN(id)) return { error: 'id should not be NaN' };
+  if (id < 1) return { error: 'id should be greater than 0' };
+
+  return { id };
 };
 
-type UpdateEventRequest = { id: number, name: string, date?: string };
-
-export const updateEventRequest = (req: Request, respond: Respond) => {
+export const updateEventRequest = (req: Request) => {
   const id = Number(req.params.id);
 
-  if (Number.isNaN(id)) {
-    console.log('wrong id format, rejecting event update');
-    respond.badRequest('id must be a number');
-    return;
-  }
+  if (Number.isNaN(id)) return { error: 'id should be a number' };
+  if (id < 1) return { error: 'id should be greater than 0' };
 
-  if (!req.body || typeof req.body !== 'object') {
-    console.log('missing body, rejecting event update');
-    respond.badRequest('body is required');
-    return;
-  }
+  if (typeof req.body !== 'object') return { error: 'body should be an object' };
+  if (!req.body) return { error: 'body should not be null' };
 
-  const { name, date } = req.body as UpdateEventRequest;
+  if ('name' in req.body === false) return { error: 'missing name field' };
+  const name = req.body.name;
 
-  if (!name) {
-    console.log('missing name, rejecting event update');
-    respond.badRequest('name is required');
-    return;
-  }
+  if (typeof name !== 'string') return { error: 'name should be a string' };
+  if (!name) return { error: 'name should not be empty' };
 
-  if (typeof name !== 'string') {
-    console.log('wrong name format, rejecting event update');
-    respond.badRequest('name must be a string');
-    return;
-  }
+  if ('date' in req.body === false) return { data: { id, name } };
+  const date = req.body.date;
 
-  if (!date) return { id, name };
+  if (typeof date !== 'string') return { error: 'date should be a string' };
+  if (!isDateString(date)) return { error: 'date should be a valid date string in the format YYYY-MM-DD' };
 
-  if (typeof date !== 'string') {
-    console.log('wrong date format, rejecting event update');
-    respond.badRequest('date must be a string in the format YYYY-MM-DD');
-    return;
-  }
-
-  if (!isDateString(date)) {
-    console.log('invalid date format, rejecting event update');
-    respond.badRequest('date must be a valid date string in the format YYYY-MM-DD');
-    return;
-  }
-
-  return { id, name, date };
+  return { data: { id, name, date } };
 };
 
-export const deleteEventRequest = (req: Request, respond: Respond) => {
+export const deleteEventRequest = (req: Request) => {
   const id = Number(req.params.id);
 
-  if (Number.isNaN(id)) {
-    console.log('wrong id format, rejecting event deletion');
-    respond.badRequest('id must be a number');
-    return;
-  }
+  if (Number.isNaN(id)) return { error: 'id should be a number' };
+  if (id < 1) return { error: 'id should be greater than 0' };
 
   return { id };
 };

@@ -1,3 +1,4 @@
+import * as parse from '$/parse';
 import { Request } from '$/server';
 import { QueryResult } from 'pg';
 
@@ -5,108 +6,62 @@ export const getAllAdminsResult = (result: QueryResult) => {
   const admins = [];
 
   for (let i = 0; i < result.rows.length; i++) {
-    const row = result.rows[i] as unknown;
+    const row = parse.object({ value: result.rows[i] });
 
-    if (typeof row !== 'object') return { error: 'row should be an object' };
-    if (!row) return { error: 'row should not be null' };
+    const id = row.property('id').number().greaterThanZero();
+    if (id.error !== undefined) return { error: id.error };
 
-    if ('id' in row === false) return { error: 'missing id field' };
-    const id = row.id;
+    const username = row.property('username').string().nonEmpty();
+    if (username.error !== undefined) return { error: username.error };
 
-    if (typeof id !== 'number') return { error: 'id should be a number' };
-    if (Number.isNaN(id)) return { error: 'id should not be NaN' };
-    if (id < 1) return { error: 'id should be greater than 0' };
-
-    if ('username' in row === false) return { error: 'missing username field' };
-    const username = row.username;
-
-    if (typeof username !== 'string') return { error: 'username should be a string' };
-    if (!username) return { error: 'username should not be empty' };
-
-    admins.push({ id, username });
+    admins.push({ id: id.value, username: username.value });
   }
 
   return { admins };
 };
 
 export const createAdminRequest = (req: Request) => {
-  if (typeof req.body !== 'object') return { error: 'body should be an object' };
-  if (!req.body) return { error: 'body should not be null' };
+  const body = parse.object({ value: req.body });
 
-  if ('username' in req.body === false) return { error: 'missing username field' };
-  if ('password' in req.body === false) return { error: 'missing password field' };
+  const username = body.property('username').string().nonEmpty();
+  if (username.error !== undefined) return { error: username.error };
 
-  const { username, password } = req.body;
+  const password = body.property('password').string().nonEmpty();
+  if (password.error !== undefined) return { error: password.error };
 
-  if (typeof username !== 'string') return { error: 'username should be a string' };
-  if (!username) return { error: 'username should not be empty' };
-
-  if (typeof password !== 'string') return { error: 'password should be a string' };
-  if (!password) return { error: 'password should not be empty' };
-
-  return { data: { username, password } };
+  return { data: { username: username.value, password: password.value } };
 };
 
 export const createAdminResult = (result: QueryResult) => {
-  const rows = result.rows as unknown[];
+  const id = parse.array({ value: result.rows }).single().object().property('id').number().greaterThanZero();
+  if (id.error !== undefined) return { error: id.error };
 
-  if (rows.length !== 1) return { error: 'result should be one row' };
-  const row = rows[0];
-
-  if (typeof row !== 'object') return { error: 'first row should be an object' };
-  if (!row) return { error: 'first row should not be null' };
-
-  if ('id' in row === false) return { error: 'missing id field' };
-  const id = row.id;
-
-  if (typeof id !== 'number') return { error: 'id should be a number' };
-  if (Number.isNaN(id)) return { error: 'id should not be NaN' };
-  if (id < 1) return { error: 'id should be greater than 0' };
-
-  return { id };
+  return { id: id.value };
 };
 
 export const updateAdminUsernameRequest = (req: Request) => {
-  const id = Number(req.params.id);
+  const id = parse.number({ value: Number(req.params.id) }).greaterThanZero();
+  if (id.error !== undefined) return { error: id.error };
 
-  if (Number.isNaN(id)) return { error: 'id should be a number' };
-  if (id < 1) return { error: 'id should be greater than 0' };
+  const username = parse.object({ value: req.body }).property('username').string().nonEmpty();
+  if (username.error !== undefined) return { error: username.error };
 
-  if (typeof req.body !== 'object') return { error: 'body should be an object' };
-  if (!req.body) return { error: 'body should not be null' };
-
-  if ('username' in req.body === false) return { error: 'missing username field' };
-  const username = req.body.username;
-
-  if (typeof username !== 'string') return { error: 'username should be a string' };
-  if (!username) return { error: 'username should not be empty' };
-
-  return { data: { id, username } };
+  return { data: { id: id.value, username: username.value } };
 };
 
 export const updateAdminPasswordRequest = (req: Request) => {
-  const id = Number(req.params.id);
+  const id = parse.number({ value: Number(req.params.id) }).greaterThanZero();
+  if (id.error !== undefined) return { error: id.error };
 
-  if (Number.isNaN(id)) return { error: 'id should be a number' };
-  if (id < 1) return { error: 'id should be greater than 0' };
+  const password = parse.object({ value: req.body }).property('password').string().nonEmpty();
+  if (password.error !== undefined) return { error: password.error };
 
-  if (typeof req.body !== 'object') return { error: 'body should be an object' };
-  if (!req.body) return { error: 'body should not be null' };
-
-  if ('password' in req.body === false) return { error: 'missing password field' };
-  const password = req.body.password;
-
-  if (typeof password !== 'string') return { error: 'password should be a string' };
-  if (!password) return { error: 'password should not be empty' };
-
-  return { data: { id, password } };
+  return { data: { id: id.value, password: password.value } };
 };
 
 export const deleteAdminRequest = (req: Request) => {
-  const id = Number(req.params.id);
+  const id = parse.number({ value: Number(req.params.id) }).greaterThanZero();
+  if (id.error !== undefined) return { error: id.error };
 
-  if (Number.isNaN(id)) return { error: 'id should be a number' };
-  if (id < 1) return { error: 'id should be greater than 0' };
-
-  return { id };
+  return { id: id.value };
 };

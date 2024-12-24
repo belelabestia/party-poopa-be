@@ -40,7 +40,7 @@ export const array = ({ error, value }: Maybe<unknown>) => {
     single: () => single(data)
   });
 
-  if (error !== undefined) return make({ error: error });
+  if (error !== undefined) return make({ error });
   if (!Array.isArray(value)) return make({ error: 'should be an array' });
 
   return make({ value: value });
@@ -52,7 +52,7 @@ export const single = ({ error, value }: Maybe<unknown[]>) => {
     object: () => object(data)
   });
 
-  if (error !== undefined) return make({ error: error });
+  if (error !== undefined) return make({ error });
   if (value.length !== 1) return make({ error: 'should have one element' });
 
   return make({ value: value[0] });
@@ -64,7 +64,7 @@ export const number = ({ error, value }: Maybe<unknown>) => {
     greaterThanZero: () => greaterThanZero(data)
   });
 
-  if (error !== undefined) return make({ error: error });
+  if (error !== undefined) return make({ error });
   if (typeof value !== 'number' || Number.isNaN(value)) return make({ error: 'should be a number' });
 
   return make({ value: value });
@@ -86,7 +86,7 @@ export const string = ({ error, value }: Maybe<unknown>) => {
     date: () => date(data)
   });
 
-  if (error !== undefined) return make({ error: error });
+  if (error !== undefined) return make({ error });
   if (typeof value !== 'string') return make({ error: 'should be a string' });
 
   return make({ value: value });

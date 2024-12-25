@@ -1,35 +1,36 @@
 import { verify } from 'jsonwebtoken';
 import { jwt } from 'config';
-import { Request, Response } from '$/server';
-import * as rsp from '$/respond';
-import * as err from '$/error';
+import { Request } from '$/server';
+import * as parse from '$/parse';
 
 type Admin = { username: string };
-type JwtResult = [Error | null, Admin | null];
 
-const verifyJwt = (token: string) => new Promise<JwtResult>(resolve => verify(token, jwt.secret, (err, decoded) => resolve([err, decoded as Admin ?? null])));
+type JwtResult =
+  | { error: string, value?: undefined }
+  | { value: Admin, error?: undefined };
 
-export const authenticate = async (req: Request, res: Response) => {
-  console.log('authenticating request');
-
-  const respond = rsp.init(res);
-  const { token } = req.cookies as { token?: unknown };
-
-  if (!token || typeof token !== 'string') {
-    console.log('no valid token provided');
-    respond.unauthorized('no valid token');
-    return;
-  }
-
-  const [error, admin] = await verifyJwt(token);
-
+const verifyJwt = (token: string) => new Promise<JwtResult>(resolve => verify(token, jwt.secret, (error, decoded) => {
   if (error) {
-    console.log('token validation failed', { message: error.message });
-    respond.unauthorized(error.message);
+    resolve({ error: error.message });
     return;
   }
 
-  if (!admin) throw err.make('no decoded token');
+  const username = parse.object({ value: decoded }).property('username').string().nonEmpty();
 
-  return admin;
+  if (username.error !== undefined) {
+    resolve({ error: username.error });
+    return;
+  }
+
+  resolve({ value: { username: username.value } });
+}));
+
+export const authenticate = async (req: Request) => {
+  const token = parse.object({ value: req.cookies }).property('token').string().nonEmpty();
+  if (token.error !== undefined) return { error: token.error };
+
+  const admin = await verifyJwt(token.value);
+  if (admin.error !== undefined) return { error: admin.error };
+
+  return { admin: admin.value };
 };

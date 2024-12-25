@@ -2,7 +2,7 @@ import * as rsp from '$/respond';
 import * as sql from './sql';
 import * as parse from './parse';
 import { Express } from 'express';
-import { db } from '$/db';
+import { pool } from '$/db';
 import { Request, Response } from '$/server';
 import { authenticate } from '$/auth';
 
@@ -14,7 +14,7 @@ const getAllEvents = async (req: Request, res: Response) => {
   console.log('getting all events from db');
 
   try {
-    const result = await db.query(sql.getAllEvents);
+    const result = await pool.query(sql.getAllEvents);
     const { error, events } = parse.getAllEventsResult(result);
 
     if (error !== undefined) {
@@ -38,7 +38,7 @@ const createEvent = async (req: Request, res: Response) => {
 
   const respond = rsp.init(res);
 
-  const { error, data } = parse.createEventRequest(req);
+  const { error, admin: data } = parse.createEventRequest(req);
 
   if (error !== undefined) {
     console.error('rejecting event creation', error);
@@ -51,7 +51,7 @@ const createEvent = async (req: Request, res: Response) => {
   console.log('creating event', { name });
 
   try {
-    const result = await db.query(sql.createEvent, [name, date]);
+    const result = await pool.query(sql.createEvent, [name, date]);
     const { error, id } = parse.createEventResult(result);
 
     if (error !== undefined) {
@@ -75,7 +75,7 @@ const updateEvent = async (req: Request, res: Response) => {
 
   const respond = rsp.init(res);
 
-  const { error, data } = parse.updateEventRequest(req);
+  const { error, admin: data } = parse.updateEventRequest(req);
 
   if (error !== undefined) {
     console.error('rejecting event update', error);
@@ -88,7 +88,7 @@ const updateEvent = async (req: Request, res: Response) => {
   console.log('udpating event', { name });
 
   try {
-    await db.query(sql.updateEvent, [id, name, date]);
+    await pool.query(sql.updateEvent, [id, name, date]);
     respond.noContent();
   }
   catch (error) {
@@ -114,7 +114,7 @@ const deleteEvent = async (req: Request, res: Response) => {
   console.log('deleting admin');
 
   try {
-    await db.query(sql.deleteEvent, [id]);
+    await pool.query(sql.deleteEvent, [id]);
     respond.noContent();
   }
   catch (error) {

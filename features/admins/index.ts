@@ -1,31 +1,38 @@
 import * as rsp from '$/respond';
-import * as sql from './sql';
+import * as db from '$/db';
 import * as parse from './parse';
+import * as sql from './sql';
 import { hash } from 'bcryptjs';
 import { Express } from 'express';
-import { db } from '$/db';
 import { Request, Response } from '$/server';
 import { authenticate } from '$/auth';
 
 const getAllAdmins = async (req: Request, res: Response) => {
-  const admin = await authenticate(req, res);
-  if (!admin) return;
-
   const respond = rsp.init(res);
-  console.log('getting all admins from db');
 
   try {
-    const result = await db.query(sql.getAllAdmins);
-    const { error, admins } = parse.getAllAdminsResult(result);
+    const auth = await authenticate(req);
+    if (auth.error !== undefined) {
+      console.error('authentication failed', auth.error);
+      respond.unauthorized('wrong credentials');
+      return;
+    }
 
-    if (error !== undefined) {
-      console.error('getting all admins from db failed', error);
+    const query = await db.query(sql.getAllAdmins);
+    if (query.error !== undefined) {
+      console.error('getting all admins from db failed', query.error);
       respond.internalServerError();
       return;
     }
 
-    console.log('getting all admins succeeded');
-    respond.ok(admins);
+    const parsed = parse.getAllAdminsResult(query.value);
+    if (parsed.error !== undefined) {
+      console.error('parsing admins from db failed', parsed.error);
+      respond.internalServerError();
+      return;
+    }
+
+    respond.ok(parsed.value);
   }
   catch (error) {
     console.error('error getting admins', error);
@@ -34,29 +41,30 @@ const getAllAdmins = async (req: Request, res: Response) => {
 };
 
 const createAdmin = async (req: Request, res: Response) => {
-  const admin = await authenticate(req, res);
-  if (!admin) return;
-
   const respond = rsp.init(res);
 
-  const { error, data } = parse.createAdminRequest(req);
-  
+  const auth = await authenticate(req);
+  if (auth.error !== undefined) {
+    console.error('authentication failed', auth.error);
+    respond.unauthorized('wrong credentials');
+    return;
+  }
+
+  const { error, value: admin } = parse.createAdminRequest(req);
   if (error !== undefined) {
     console.error('rejecting admin creation', error);
     respond.badRequest(error);
     return;
   }
 
-  const { username, password } = data;
-
-  console.log('creating admin on db', { username });
+  console.log('creating admin on db', { username: admin.username });
 
   try {
-    const hashed = await hash(password, 10);
+    const hashed = await hash(admin.password, 10);
     const result = await db.query(sql.createAdmin, [username, hashed]);
 
     const { error, id } = parse.createAdminResult(result);
-    
+
     if (error !== undefined) {
       console.error('error creating admin on db', error);
       respond.internalServerError();
@@ -84,13 +92,13 @@ const createAdmin = async (req: Request, res: Response) => {
 };
 
 const updateAdminUsername = async (req: Request, res: Response) => {
-  const admin = await authenticate(req, res);
+  const admin = await authenticate(req);
   if (!admin) return;
 
   const respond = rsp.init(res);
 
-  const { error, data } = parse.updateAdminUsernameRequest(req);
-  
+  const { error, admin: data } = parse.updateAdminUsernameRequest(req);
+
   if (error !== undefined) {
     console.error('rejecting username update', error);
     respond.badRequest(error);
@@ -124,12 +132,12 @@ const updateAdminUsername = async (req: Request, res: Response) => {
 };
 
 const updateAdminPassword = async (req: Request, res: Response) => {
-  const admin = await authenticate(req, res);
+  const admin = await authenticate(req);
   if (!admin) return;
 
   const respond = rsp.init(res);
 
-  const { error, data } = parse.updateAdminPasswordRequest(req);
+  const { error, admin: data } = parse.updateAdminPasswordRequest(req);
 
   if (error !== undefined) {
     console.error('rejecting password update', error);
@@ -160,7 +168,7 @@ const deleteAdmin = async (req: Request, res: Response) => {
   const respond = rsp.init(res);
 
   const { error, id } = parse.deleteAdminRequest(req);
-  
+
   if (error !== undefined) {
     console.error('rejecting admin deletion', error);
     respond.badRequest(error);

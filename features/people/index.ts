@@ -1,7 +1,7 @@
 import { Express } from 'express';
 import { authenticate } from '$/auth';
 import { Request, Response } from '$/server';
-import { db } from '$/db';
+import { pool } from '$/db';
 import * as rsp from '$/respond';
 import * as sql from './sql';
 
@@ -13,7 +13,7 @@ const getAllPeople = async (req: Request, res: Response) => {
   console.log('getting all people');
 
   try {
-    const { rows } = await db.query(sql.getAllPeople);
+    const { rows } = await pool.query(sql.getAllPeople);
     console.log('getting all people succeded');
     respond.ok(rows);
   }
@@ -32,7 +32,7 @@ const createPerson = async (req: Request, res: Response) => {
   console.log('create person');
 
   try {
-    const { rows: [{ id }] } = await db.query(sql.createPerson, [data]);
+    const { rows: [{ id }] } = await pool.query(sql.createPerson, [data]);
     console.log('crating person succeded');
     respond.ok({ id });
   }
@@ -51,7 +51,7 @@ const updatePerson = async (req: Request, res: Response) => {
   console.log('updating person');
 
   try {
-    await db.query(sql.updatePerson, [id, data]);
+    await pool.query(sql.updatePerson, [id, data]);
     console.log('updating person succeded');
     respond.noContent();
   }
@@ -70,7 +70,7 @@ const deletePerson = async (req: Request, res: Response) => {
   console.log('deleting person');
 
   try {
-    await db.query(sql.deletePerson, [id]);
+    await pool.query(sql.deletePerson, [id]);
     console.log('deleting person succeded');
     respond.noContent();
   }

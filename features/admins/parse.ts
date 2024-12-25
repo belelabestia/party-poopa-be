@@ -3,7 +3,7 @@ import { Request } from '$/server';
 import { QueryResult } from 'pg';
 
 export const getAllAdminsResult = (result: QueryResult) => {
-  const admins = [];
+  const value = [];
 
   for (let i = 0; i < result.rows.length; i++) {
     const row = parse.object({ value: result.rows[i] });
@@ -14,10 +14,10 @@ export const getAllAdminsResult = (result: QueryResult) => {
     const username = row.property('username').string().nonEmpty();
     if (username.error !== undefined) return { error: username.error };
 
-    admins.push({ id: id.value, username: username.value });
+    value.push({ id: id.value, username: username.value });
   }
 
-  return { admins };
+  return { value };
 };
 
 export const createAdminRequest = (req: Request) => {
@@ -29,7 +29,7 @@ export const createAdminRequest = (req: Request) => {
   const password = body.property('password').string().nonEmpty();
   if (password.error !== undefined) return { error: password.error };
 
-  return { data: { username: username.value, password: password.value } };
+  return { value: { username: username.value, password: password.value } };
 };
 
 export const createAdminResult = (result: QueryResult) => {
@@ -46,7 +46,7 @@ export const updateAdminUsernameRequest = (req: Request) => {
   const username = parse.object({ value: req.body }).property('username').string().nonEmpty();
   if (username.error !== undefined) return { error: username.error };
 
-  return { data: { id: id.value, username: username.value } };
+  return { value: { id: id.value, username: username.value } };
 };
 
 export const updateAdminPasswordRequest = (req: Request) => {
@@ -56,7 +56,7 @@ export const updateAdminPasswordRequest = (req: Request) => {
   const password = parse.object({ value: req.body }).property('password').string().nonEmpty();
   if (password.error !== undefined) return { error: password.error };
 
-  return { data: { id: id.value, password: password.value } };
+  return { value: { id: id.value, password: password.value } };
 };
 
 export const deleteAdminRequest = (req: Request) => {

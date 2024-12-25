@@ -5,7 +5,7 @@ import { compare } from 'bcryptjs';
 import { jwt } from 'config';
 import { Express } from 'express';
 import { sign } from 'jsonwebtoken';
-import { db } from '$/db';
+import { pool } from '$/db';
 import { Request, Response } from '$/server';
 
 type Cookie = {
@@ -16,7 +16,7 @@ type Cookie = {
 const login = async (req: Request, res: Response & Cookie) => {
   const respond = rsp.init(res);
 
-  const { error, data } = parse.loginRequest(req);
+  const { error, admin: data } = parse.loginRequest(req);
   
   if (error !== undefined) {
     console.error('admin login failed', error);
@@ -29,9 +29,9 @@ const login = async (req: Request, res: Response & Cookie) => {
   console.log('logging admin in', { username });
 
   try {
-    const result = await db.query(sql.getAdminByUsername, [username]);
+    const result = await pool.query(sql.getAdminByUsername, [username]);
 
-    const { error, unauthorized, admin } = parse.loginResult(result);
+    const { error, unauthorized, value: admin } = parse.loginResult(result);
     
     if (error !== undefined) {
       console.error('admin login failed', error);

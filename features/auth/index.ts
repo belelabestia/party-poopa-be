@@ -5,7 +5,7 @@ import { compare } from 'bcryptjs';
 import { jwt } from 'config';
 import { Express } from 'express';
 import { sign } from 'jsonwebtoken';
-import { pool } from '$/db';
+import * as db from '$/db';
 import { Request, Response } from '$/server';
 
 type Cookie = {
@@ -14,39 +14,42 @@ type Cookie = {
 };
 
 const login = async (req: Request, res: Response & Cookie) => {
+  console.log('hit endpoint', login.name);
   const respond = rsp.init(res);
 
-  const { error, admin: data } = parse.loginRequest(req);
-  
-  if (error !== undefined) {
-    console.error('admin login failed', error);
-    respond.badRequest(error);
-    return;
-  }
-
-  const { username, password } = data;
-
-  console.log('logging admin in', { username });
-
   try {
-    const result = await pool.query(sql.getAdminByUsername, [username]);
+    const request = parse.loginRequest(req);
+    if (request.error !== undefined) {
+      console.error('admin login failed', request.error);
+      respond.badRequest(request.error);
+      return;
+    }
 
-    const { error, unauthorized, value: admin } = parse.loginResult(result);
-    
-    if (error !== undefined) {
-      console.error('admin login failed', error);
+    const { username, password } = request.result;
+
+    const query = await db.query(sql.getAdminByUsername, [username]);
+    if (query.error !== undefined) {
+      console.error('admin login failed', query.error);
       respond.internalServerError();
       return;
     }
 
-    if (unauthorized || unauthorized !== undefined) {
+    const parsed = parse.loginResult(query.result);
+    if (parsed.unauthorized) {
       console.log('wrong credentials', { username });
       respond.unauthorized('wrong credentials');
       return;
     }
 
-    const passwordMatches = await compare(password, admin.password_hash);
+    if (parsed.error !== undefined) {
+      console.error('error creating admin on db', parsed.error);
+      respond.internalServerError();
+      return;
+    }
 
+    const { password_hash } = parsed.result;
+
+    const passwordMatches = await compare(password, password_hash);
     if (!passwordMatches) {
       console.log('wrong password, admin login failed', { username });
       respond.unauthorized('wrong credentials');

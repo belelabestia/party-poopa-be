@@ -11,15 +11,15 @@ export const loginRequest = (req: Request) => {
   const password = obj.property('password').string().nonEmpty();
   if (password.error !== undefined) return { error: password.error };
 
-  return { data: { username: username.value, password: password.value } };
+  return { result: { username: username.value, password: password.value } };
 };
 
 export const loginResult = (result: QueryResult) => {
   const rows = parse.array({ value: result.rows });
-  if (rows.value?.length === 0) return { unauthorized: true };
+  if (rows.value?.length === 0) return { unauthorized: Symbol() };
 
   const password_hash = parse.single(rows).object().property('password_hash').string().nonEmpty();
   if (password_hash.error !== undefined) return { error: password_hash.error };
 
-  return { admin: { password_hash: password_hash.value } };
+  return { result: { password_hash: password_hash.value } };
 };

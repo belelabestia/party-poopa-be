@@ -78,15 +78,15 @@ const createAdmin = async (req: Request, res: Response) => {
       return;
     }
 
-    const id = parse.createAdminResult(query.result);
-    if (id.error !== undefined) {
-      console.error('error creating admin on db', id.error);
+    const parsed = parse.createAdminResult(query.result);
+    if (parsed.error !== undefined) {
+      console.error('error creating admin on db', parsed.error);
       respond.internalServerError();
       return;
     }
 
     console.log('created admin', { username });
-    respond.ok({ id: id.result });
+    respond.ok({ id: parsed.result });
   }
   catch (error) {
     console.error('error creating admin', error);

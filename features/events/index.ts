@@ -1,30 +1,39 @@
 import * as rsp from '$/respond';
 import * as sql from './sql';
 import * as parse from './parse';
+import * as db from '$/db';
 import { Express } from 'express';
-import { pool } from '$/db';
 import { Request, Response } from '$/server';
 import { authenticate } from '$/auth';
 
 const getAllEvents = async (req: Request, res: Response) => {
-  const admin = await authenticate(req, res);
-  if (!admin) return;
-
+  console.log('hit endpoint', getAllEvents.name);
   const respond = rsp.init(res);
-  console.log('getting all events from db');
 
   try {
-    const result = await pool.query(sql.getAllEvents);
-    const { error, events } = parse.getAllEventsResult(result);
+    const auth = await authenticate(req);
+    if (auth.error !== undefined) {
+      console.error('authentication failed', auth.error);
+      respond.unauthorized('invalid token');
+      return;
+    }
 
-    if (error !== undefined) {
-      console.error('getting all events from db failed', error);
+    const query = await db.query(sql.getAllEvents);
+    if (query.error !== undefined) {
+      console.error('getting all events from db failed', query.error);
       respond.internalServerError();
       return;
     }
 
-    console.log('getting all events succeeded');
-    respond.ok(events);
+    const parsed = parse.getAllEventsResult(query.result);
+    if (parsed.error !== undefined) {
+      console.error('parsing events from db failed', parsed.error);
+      respond.internalServerError();
+      return;
+    }
+
+    console.log('got all events');
+    respond.ok(parsed.result);
   }
   catch (error) {
     console.error('error getting events', error);
@@ -33,35 +42,42 @@ const getAllEvents = async (req: Request, res: Response) => {
 };
 
 const createEvent = async (req: Request, res: Response) => {
-  const admin = await authenticate(req, res);
-  if (!admin) return;
-
+  console.log('hit endpoint', createEvent.name);
   const respond = rsp.init(res);
 
-  const { error, admin: data } = parse.createEventRequest(req);
-
-  if (error !== undefined) {
-    console.error('rejecting event creation', error);
-    respond.badRequest(error);
-    return;
-  }
-
-  const { name, date } = data;
-
-  console.log('creating event', { name });
-
   try {
-    const result = await pool.query(sql.createEvent, [name, date]);
-    const { error, id } = parse.createEventResult(result);
+    const auth = await authenticate(req);
+    if (auth.error !== undefined) {
+      console.error('authentication failed', auth.error);
+      respond.unauthorized('invalid token');
+      return;
+    }
 
-    if (error !== undefined) {
-      console.error('error creating event', error);
+    const request = parse.createEventRequest(req);
+    if (request.error !== undefined) {
+      console.error('parsing request failed', request.error);
+      respond.badRequest(request.error);
+      return;
+    }
+
+    const { name, date } = request.result;
+
+    const query = await db.query(sql.createEvent, [name, date]);
+    if (query.error !== undefined) {
+      console.error('creating event on db failed', query.error);
       respond.internalServerError();
       return;
     }
 
-    console.log('event created successfully');
-    respond.ok({ id });
+    const parsed = parse.createEventResult(query.result);
+    if (parsed.error !== undefined) {
+      console.error('creating event on db failed', parsed.error);
+      respond.internalServerError();
+      return;
+    }
+
+    console.log('event created successfully', { name });
+    respond.ok({ id: parsed.result });
   }
   catch (error) {
     console.error('error creating admin', error);
@@ -70,25 +86,34 @@ const createEvent = async (req: Request, res: Response) => {
 };
 
 const updateEvent = async (req: Request, res: Response) => {
-  const admin = await authenticate(req, res);
-  if (!admin) return;
-
+  console.log('hit endpoint', updateEvent.name);
   const respond = rsp.init(res);
 
-  const { error, admin: data } = parse.updateEventRequest(req);
-
-  if (error !== undefined) {
-    console.error('rejecting event update', error);
-    respond.badRequest(error);
-    return;
-  }
-
-  const { id, name, date } = data;
-
-  console.log('udpating event', { name });
-
   try {
-    await pool.query(sql.updateEvent, [id, name, date]);
+    const auth = await authenticate(req);
+    if (auth.error !== undefined) {
+      console.error('authentication failed', auth.error);
+      respond.unauthorized('');
+      return;
+    }
+
+    const request = parse.updateEventRequest(req);
+    if (request.error !== undefined) {
+      console.error('error parsing request', request.error);
+      respond.badRequest(request.error);
+      return;
+    }
+
+    const { id, name, date } = request.result;
+
+    const query = await db.query(sql.updateEvent, [id, name, date]);
+    if (query.error !== undefined) {
+      console.error('updating admin on db failed', query.error);
+      respond.internalServerError();
+      return;
+    }
+
+    console.log('updated event', { name });
     respond.noContent();
   }
   catch (error) {
@@ -98,27 +123,39 @@ const updateEvent = async (req: Request, res: Response) => {
 };
 
 const deleteEvent = async (req: Request, res: Response) => {
-  const admin = await authenticate(req, res);
-  if (!admin) return;
-
+  console.log('hit endpoint', deleteEvent.name);
   const respond = rsp.init(res);
 
-  const { error, id } = parse.deleteEventRequest(req);
-
-  if (error !== undefined) {
-    console.error('rejecting event deletion', error);
-    respond.badRequest(error);
-    return;
-  }
-
-  console.log('deleting admin');
-
   try {
-    await pool.query(sql.deleteEvent, [id]);
+    const auth = await authenticate(req);
+    if (auth.error !== undefined) {
+      console.error('authentication failed', auth.error);
+      respond.unauthorized('');
+      return;
+    }
+
+
+    const request = parse.deleteEventRequest(req);
+    if (request.error !== undefined) {
+      console.error('error parsing request', request.error);
+      respond.badRequest(request.error);
+      return;
+    }
+
+    const { id } = request.result;
+
+    const query = await db.query(sql.deleteEvent, [id]);
+    if (query.error !== undefined) {
+      console.error('updating event on db failed', query.error);
+      respond.internalServerError();
+      return;
+    }
+
+    console.log('deleted event', { id });
     respond.noContent();
   }
   catch (error) {
-    console.error('error deleting admin', error);
+    console.error('deleting event failed', error);
     respond.internalServerError();
   }
 };

@@ -178,6 +178,7 @@ const updateAdminPassword = async (req: Request, res: Response) => {
 };
 
 const deleteAdmin = async (req: Request, res: Response) => {
+  console.log('hit endpoint', deleteAdmin.name);
   const respond = rsp.init(res);
 
   try {

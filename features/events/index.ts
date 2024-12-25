@@ -80,7 +80,7 @@ const createEvent = async (req: Request, res: Response) => {
     respond.ok({ id: parsed.result });
   }
   catch (error) {
-    console.error('error creating admin', error);
+    console.error('error creating event', error);
     respond.internalServerError();
   }
 };
@@ -108,7 +108,7 @@ const updateEvent = async (req: Request, res: Response) => {
 
     const query = await db.query(sql.updateEvent, [id, name, date]);
     if (query.error !== undefined) {
-      console.error('updating admin on db failed', query.error);
+      console.error('updating event on db failed', query.error);
       respond.internalServerError();
       return;
     }

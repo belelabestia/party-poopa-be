@@ -33,7 +33,7 @@ const getAllEvents = async (req: Request, res: Response) => {
     }
 
     console.log('got all events');
-    respond.ok(parsed.result);
+    respond.ok(parsed.events);
   }
   catch (error) {
     console.error('error getting events', error);
@@ -60,7 +60,7 @@ const createEvent = async (req: Request, res: Response) => {
       return;
     }
 
-    const { name, date } = request.result;
+    const { name, date } = request.event;
 
     const query = await db.query(sql.createEvent, [name, date]);
     if (query.error !== undefined) {
@@ -77,7 +77,7 @@ const createEvent = async (req: Request, res: Response) => {
     }
 
     console.log('event created successfully', { name });
-    respond.ok({ id: parsed.result });
+    respond.ok({ id: parsed.id });
   }
   catch (error) {
     console.error('error creating event', error);
@@ -104,7 +104,7 @@ const updateEvent = async (req: Request, res: Response) => {
       return;
     }
 
-    const { id, name, date } = request.result;
+    const { id, name, date } = request.event;
 
     const query = await db.query(sql.updateEvent, [id, name, date]);
     if (query.error !== undefined) {
@@ -134,7 +134,6 @@ const deleteEvent = async (req: Request, res: Response) => {
       return;
     }
 
-
     const request = parse.deleteEventRequest(req);
     if (request.error !== undefined) {
       console.error('error parsing request', request.error);
@@ -142,7 +141,7 @@ const deleteEvent = async (req: Request, res: Response) => {
       return;
     }
 
-    const { id } = request.result;
+    const { id } = request;
 
     const query = await db.query(sql.deleteEvent, [id]);
     if (query.error !== undefined) {

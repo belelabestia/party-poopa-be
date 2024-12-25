@@ -34,7 +34,7 @@ const getAllAdmins = async (req: Request, res: Response) => {
     }
 
     console.log('got all admins');
-    respond.ok(parsed.result);
+    respond.ok(parsed.admins);
   }
   catch (error) {
     console.error('error getting admins', error);
@@ -86,7 +86,7 @@ const createAdmin = async (req: Request, res: Response) => {
     }
 
     console.log('created admin', { username });
-    respond.ok({ id: parsed.result });
+    respond.ok({ id: parsed.id });
   }
   catch (error) {
     console.error('error creating admin', error);
@@ -113,7 +113,7 @@ const updateAdminUsername = async (req: Request, res: Response) => {
       return;
     }
 
-    const { id, username } = request.result;
+    const { id, username } = request.admin;
 
     const query = await db.query(sql.updateAdminUsername, [id, username]);
     const constraint = parse.constraint(query.error);
@@ -158,7 +158,7 @@ const updateAdminPassword = async (req: Request, res: Response) => {
       return;
     }
 
-    const { id, password } = request.result;
+    const { id, password } = request.admin;
 
     const hashed = await hash(password, 10);
     const query = await db.query(sql.updateAdminPassword, [id, hashed]);
@@ -197,7 +197,7 @@ const deleteAdmin = async (req: Request, res: Response) => {
       return;
     }
 
-    const { id } = request.result;
+    const { id } = request;
 
     const query = await db.query(sql.deleteAdmin, [id]);
     if (query.error !== undefined) {

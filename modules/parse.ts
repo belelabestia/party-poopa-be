@@ -101,7 +101,7 @@ export const nonEmpty = ({ error, value }: ParseResult<string>) => {
 
 type Date = Branded<string, 'date'>;
 
-export const date = ({ error, value }: ParseResult<string>): ParseResult<Date> => {
+export const date = ({ error, value }: ParseResult<string>) => {
   if (error !== undefined) return { error };
   if (!isDateString(value)) return { error: 'should be a date string (YYYY-MM-DD)' };
 

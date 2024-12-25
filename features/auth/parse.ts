@@ -11,7 +11,7 @@ export const loginRequest = (req: Request) => {
   const password = obj.property('password').string().nonEmpty();
   if (password.error !== undefined) return { error: password.error };
 
-  return { result: { username: username.value, password: password.value } };
+  return { admin: { username: username.value, password: password.value } };
 };
 
 export const loginResult = (result: QueryResult) => {
@@ -21,5 +21,5 @@ export const loginResult = (result: QueryResult) => {
   const password_hash = parse.single(rows).object().property('password_hash').string().nonEmpty();
   if (password_hash.error !== undefined) return { error: password_hash.error };
 
-  return { result: { password_hash: password_hash.value } };
+  return { password_hash: password_hash.value };
 };

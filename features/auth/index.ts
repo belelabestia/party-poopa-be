@@ -25,7 +25,7 @@ const login = async (req: Request, res: Response & Cookie) => {
       return;
     }
 
-    const { username, password } = request.result;
+    const { username, password } = request.admin;
 
     const query = await db.query(sql.getAdminByUsername, [username]);
     if (query.error !== undefined) {
@@ -47,7 +47,7 @@ const login = async (req: Request, res: Response & Cookie) => {
       return;
     }
 
-    const { password_hash } = parsed.result;
+    const { password_hash } = parsed;
 
     const passwordMatches = await compare(password, password_hash);
     if (!passwordMatches) {

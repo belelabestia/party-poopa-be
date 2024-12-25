@@ -3,7 +3,7 @@ import { Request } from '$/server';
 import { QueryResult } from 'pg';
 
 export const getAllEventsResult = (result: QueryResult) => {
-  const items = [];
+  const events = [];
 
   for (let i = 0; i < result.rows.length; i++) {
     const row = parse.object({ value: result.rows[i] });
@@ -17,17 +17,17 @@ export const getAllEventsResult = (result: QueryResult) => {
     const dateProp = row.property('date');
 
     if (dateProp.error !== undefined) {
-      items.push({ id: id.value, name: name.value });
+      events.push({ id: id.value, name: name.value });
       continue;
     }
 
     const date = parse.string(dateProp).date();
     if (date.error !== undefined) return { error: date.error };
 
-    items.push({ id: id.value, name: name.value, date: date.value });
+    events.push({ id: id.value, name: name.value, date: date.value });
   }
 
-  return { result: items };
+  return { events };
 };
 
 export const createEventRequest = (req: Request) => {
@@ -39,14 +39,14 @@ export const createEventRequest = (req: Request) => {
   const date = body.property('date').string().date();
   if (date.error !== undefined) return { error: date.error };
 
-  return { result: { name: name.value, date: date.value } };
+  return { event: { name: name.value, date: date.value } };
 };
 
 export const createEventResult = (result: QueryResult) => {
   const id = parse.array({ value: result.rows }).single().object().property('id').number().greaterThanZero();
   if (id.error !== undefined) return { error: id.error };
 
-  return { result: id.value };
+  return { id: id.value };
 };
 
 export const updateEventRequest = (req: Request) => {
@@ -61,12 +61,12 @@ export const updateEventRequest = (req: Request) => {
   const date = body.property('date').string().date();
   if (date.error !== undefined) return { error: date.error };
 
-  return { result: { id: id.value, name: name.value, date: date.value } };
+  return { event: { id: id.value, name: name.value, date: date.value } };
 };
 
 export const deleteEventRequest = (req: Request) => {
   const id = parse.number({ value: Number(req.params.id) }).greaterThanZero();
   if (id.error !== undefined) return { error: id.error };
 
-  return { result: { id: id.value } };
+  return { id:id.value };
 };

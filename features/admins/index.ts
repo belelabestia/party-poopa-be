@@ -8,13 +8,14 @@ import { Request, Response } from '$/server';
 import { authenticate } from '$/auth';
 
 const getAllAdmins = async (req: Request, res: Response) => {
+  console.log('hit endpoint', getAllAdmins.name);
   const respond = rsp.init(res);
 
   try {
     const auth = await authenticate(req);
     if (auth.error !== undefined) {
       console.error('authentication failed', auth.error);
-      respond.unauthorized('wrong credentials');
+      respond.unauthorized('invalid token');
       return;
     }
 
@@ -25,14 +26,15 @@ const getAllAdmins = async (req: Request, res: Response) => {
       return;
     }
 
-    const parsed = parse.getAllAdminsResult(query.value);
+    const parsed = parse.getAllAdminsResult(query.result);
     if (parsed.error !== undefined) {
       console.error('parsing admins from db failed', parsed.error);
       respond.internalServerError();
       return;
     }
 
-    respond.ok(parsed.value);
+    console.log('got all admins');
+    respond.ok(parsed.result);
   }
   catch (error) {
     console.error('error getting admins', error);
@@ -41,118 +43,132 @@ const getAllAdmins = async (req: Request, res: Response) => {
 };
 
 const createAdmin = async (req: Request, res: Response) => {
+  console.log('hit endpoint', createAdmin.name);
   const respond = rsp.init(res);
 
-  const auth = await authenticate(req);
-  if (auth.error !== undefined) {
-    console.error('authentication failed', auth.error);
-    respond.unauthorized('wrong credentials');
-    return;
-  }
-
-  const { error, value: admin } = parse.createAdminRequest(req);
-  if (error !== undefined) {
-    console.error('rejecting admin creation', error);
-    respond.badRequest(error);
-    return;
-  }
-
-  console.log('creating admin on db', { username: admin.username });
-
   try {
-    const hashed = await hash(admin.password, 10);
-    const result = await db.query(sql.createAdmin, [username, hashed]);
-
-    const { error, id } = parse.createAdminResult(result);
-
-    if (error !== undefined) {
-      console.error('error creating admin on db', error);
-      respond.internalServerError();
+    const auth = await authenticate(req);
+    if (auth.error !== undefined) {
+      console.error('authentication failed', auth.error);
+      respond.unauthorized('invalid token');
       return;
     }
 
-    console.log('admin created successfully');
-    respond.ok({ id });
-  }
-  catch (error) {
-    if (
-      typeof error === 'object' &&
-      error !== null &&
-      'constraint' in error &&
-      error.constraint === 'admins_username_key'
-    ) {
-      console.log('duplicate username');
+    const request = parse.createAdminRequest(req);
+    if (request.error !== undefined) {
+      console.error('error parsing request', request.error);
+      respond.badRequest(request.error);
+      return;
+    }
+
+    const { username, password } = request.result;
+    const hashed = await hash(password, 10);
+    const query = await db.query(sql.createAdmin, [username, hashed]);
+    const constraint = parse.constraint(query.error);
+
+    if (constraint.value === 'admins_username_key') {
+      console.log('duplicate admin username', { username });
       respond.badRequest('duplicate username');
       return;
     }
 
+    if (query.error !== undefined) {
+      console.error('creating admin on db failed', query.error);
+      respond.internalServerError();
+      return;
+    }
+
+    const id = parse.createAdminResult(query.result);
+    if (id.error !== undefined) {
+      console.error('error creating admin on db', id.error);
+      respond.internalServerError();
+      return;
+    }
+
+    console.log('created admin', { username });
+    respond.ok({ id: id.result });
+  }
+  catch (error) {
     console.error('error creating admin', error);
     respond.internalServerError();
   }
 };
 
 const updateAdminUsername = async (req: Request, res: Response) => {
-  const admin = await authenticate(req);
-  if (!admin) return;
-
+  console.log('hit endpoint', updateAdminUsername.name);
   const respond = rsp.init(res);
 
-  const { error, admin: data } = parse.updateAdminUsernameRequest(req);
-
-  if (error !== undefined) {
-    console.error('rejecting username update', error);
-    respond.badRequest(error);
-    return;
-  }
-
-  const { id, username } = data;
-
-  console.log('updating username');
-
   try {
-    await db.query(sql.updateAdminUsername, [id, username]);
-    console.log('username updated successfully');
-    respond.noContent();
-  }
-  catch (error) {
-    if (
-      typeof error === 'object' &&
-      error !== null &&
-      'constraint' in error &&
-      error.constraint === 'admins_username_key'
-    ) {
-      console.log('duplicate username');
+    const auth = await authenticate(req);
+    if (auth.error !== undefined) {
+      console.error('authentication failed', auth.error);
+      respond.unauthorized('');
+      return;
+    }
+
+    const request = parse.updateAdminUsernameRequest(req);
+    if (request.error !== undefined) {
+      console.error('error parsing request', request.error);
+      respond.badRequest(request.error);
+      return;
+    }
+
+    const { id, username } = request.result;
+
+    const query = await db.query(sql.updateAdminUsername, [id, username]);
+    const constraint = parse.constraint(query.error);
+
+    if (constraint.value === 'admins_username_key') {
+      console.log('duplicate admin username', { username });
       respond.badRequest('duplicate username');
       return;
     }
 
+    if (query.error !== undefined) {
+      console.error('updating admin on db failed', query.error);
+      respond.internalServerError();
+      return;
+    }
+
+    console.log('updated username', { username });
+    respond.noContent();
+  }
+  catch (error) {
     console.error('updating username failed', error);
     respond.internalServerError();
   }
 };
 
 const updateAdminPassword = async (req: Request, res: Response) => {
-  const admin = await authenticate(req);
-  if (!admin) return;
-
+  console.log('hit endpoint', updateAdminUsername.name);
   const respond = rsp.init(res);
 
-  const { error, admin: data } = parse.updateAdminPasswordRequest(req);
-
-  if (error !== undefined) {
-    console.error('rejecting password update', error);
-    respond.badRequest(error);
-    return;
-  }
-
-  const { id, password } = data;
-
-  console.log('udpating password');
-
   try {
+    const auth = await authenticate(req);
+    if (auth.error !== undefined) {
+      console.error('authentication failed', auth.error);
+      respond.unauthorized('');
+      return;
+    }
+
+    const request = parse.updateAdminPasswordRequest(req);
+    if (request.error !== undefined) {
+      console.error('error parsing request', request.error);
+      respond.badRequest(request.error);
+      return;
+    }
+
+    const { id, password } = request.result;
+
     const hashed = await hash(password, 10);
-    await db.query(sql.updateAdminPassword, [id, hashed]);
-    console.log('password updated successfully');
+    const query = await db.query(sql.updateAdminPassword, [id, hashed]);
+    if (query.error !== undefined) {
+      console.error('updating admin on db failed', query.error);
+      respond.internalServerError();
+      return;
+    }
+
+    console.log('updated password', { id });
     respond.noContent();
   }
   catch (error) {
@@ -162,28 +178,38 @@ const updateAdminPassword = async (req: Request, res: Response) => {
 };
 
 const deleteAdmin = async (req: Request, res: Response) => {
-  const admin = await authenticate(req, res);
-  if (!admin) return;
-
   const respond = rsp.init(res);
 
-  const { error, id } = parse.deleteAdminRequest(req);
-
-  if (error !== undefined) {
-    console.error('rejecting admin deletion', error);
-    respond.badRequest(error);
-    return;
-  }
-
-  console.log('deleting admin');
-
   try {
-    await db.query(sql.deleteAdmin, [id]);
-    console.log('admin deleted successfully');
+    const auth = await authenticate(req);
+    if (auth.error !== undefined) {
+      console.error('authentication failed', auth.error);
+      respond.unauthorized('');
+      return;
+    }
+
+
+    const request = parse.deleteAdminRequest(req);
+    if (request.error !== undefined) {
+      console.error('error parsing request', request.error);
+      respond.badRequest(request.error);
+      return;
+    }
+
+    const { id } = request.result;
+
+    const query = await db.query(sql.deleteAdmin, [id]);
+    if (query.error !== undefined) {
+      console.error('updating admin on db failed', query.error);
+      respond.internalServerError();
+      return;
+    }
+
+    console.log('deleted admin', { id });
     respond.noContent();
   }
   catch (error) {
-    console.error('error deleting admin', error);
+    console.error('deleting admin failed', error);
     respond.internalServerError();
   }
 };

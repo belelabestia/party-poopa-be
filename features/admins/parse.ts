@@ -2,8 +2,10 @@ import * as parse from '$/parse';
 import { Request } from '$/server';
 import { QueryResult } from 'pg';
 
+export const core = parse;
+
 export const getAllAdminsResult = (result: QueryResult) => {
-  const value = [];
+  const items = [];
 
   for (let i = 0; i < result.rows.length; i++) {
     const row = parse.object({ value: result.rows[i] });
@@ -14,10 +16,10 @@ export const getAllAdminsResult = (result: QueryResult) => {
     const username = row.property('username').string().nonEmpty();
     if (username.error !== undefined) return { error: username.error };
 
-    value.push({ id: id.value, username: username.value });
+    items.push({ id: id.value, username: username.value });
   }
 
-  return { value };
+  return { result: items };
 };
 
 export const createAdminRequest = (req: Request) => {
@@ -29,14 +31,14 @@ export const createAdminRequest = (req: Request) => {
   const password = body.property('password').string().nonEmpty();
   if (password.error !== undefined) return { error: password.error };
 
-  return { value: { username: username.value, password: password.value } };
+  return { result: { username: username.value, password: password.value } };
 };
 
 export const createAdminResult = (result: QueryResult) => {
   const id = parse.array({ value: result.rows }).single().object().property('id').number().greaterThanZero();
   if (id.error !== undefined) return { error: id.error };
 
-  return { id: id.value };
+  return { result: id.value };
 };
 
 export const updateAdminUsernameRequest = (req: Request) => {
@@ -46,7 +48,7 @@ export const updateAdminUsernameRequest = (req: Request) => {
   const username = parse.object({ value: req.body }).property('username').string().nonEmpty();
   if (username.error !== undefined) return { error: username.error };
 
-  return { value: { id: id.value, username: username.value } };
+  return { result: { id: id.value, username: username.value } };
 };
 
 export const updateAdminPasswordRequest = (req: Request) => {
@@ -56,12 +58,14 @@ export const updateAdminPasswordRequest = (req: Request) => {
   const password = parse.object({ value: req.body }).property('password').string().nonEmpty();
   if (password.error !== undefined) return { error: password.error };
 
-  return { value: { id: id.value, password: password.value } };
+  return { result: { id: id.value, password: password.value } };
 };
 
 export const deleteAdminRequest = (req: Request) => {
   const id = parse.number({ value: Number(req.params.id) }).greaterThanZero();
   if (id.error !== undefined) return { error: id.error };
 
-  return { id: id.value };
+  return { result: { id: id.value } };
 };
+
+export const constraint = (x: unknown) => parse.object({ value: x }).property('constraint').string().nonEmpty();

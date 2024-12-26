@@ -64,7 +64,7 @@ const createAdmin = async (req: Request, res: Response) => {
     const { username, password } = request.result;
     const hashed = await hash(password, 10);
     const query = await db.query(sql.createAdmin, [username, hashed]);
-    const constraint = parse.constraint(query.error);
+    const constraint = parse.constraint(query.error?.cause);
 
     if (constraint.value === 'admins_username_key') {
       console.log('duplicate admin username', { username });

@@ -1,6 +1,9 @@
-import * as parse from '$/parse';
+import { makeFail } from '$/error';
 import { Request } from '$/server';
 import { QueryResult } from 'pg';
+import * as parse from '$/parse';
+
+const fail = makeFail('events parse error');
 
 export const getAllEventsResult = (result: QueryResult) => {
   const events = [];
@@ -9,10 +12,10 @@ export const getAllEventsResult = (result: QueryResult) => {
     const row = parse.object({ value: result.rows[i] });
 
     const id = row.property('id').number().greaterThanZero();
-    if (id.error) return { error: id.error };
+    if (id.error) return { error: fail(id.error) };
 
     const name = row.property('name').string().nonEmpty();
-    if (name.error) return { error: name.error };
+    if (name.error) return { error: fail(name.error) };
 
     const dateProp = row.property('date');
 
@@ -21,8 +24,8 @@ export const getAllEventsResult = (result: QueryResult) => {
       continue;
     }
 
-    const date = parse.string(dateProp).date();
-    if (date.error) return { error: date.error };
+    const date = dateProp.string().date();
+    if (date.error) return { error: fail(date.error) };
 
     events.push({ id: id.value, name: name.value, date: date.value });
   }
@@ -34,39 +37,39 @@ export const createEventRequest = (req: Request) => {
   const body = parse.object({ value: req.body });
 
   const name = body.property('name').string().nonEmpty();
-  if (name.error) return { error: name.error };
+  if (name.error) return { error: fail(name.error) };
 
   const date = body.property('date').string().date();
-  if (date.error) return { error: date.error };
+  if (date.error) return { error: fail(date.error) };
 
   return { event: { name: name.value, date: date.value } };
 };
 
 export const createEventResult = (result: QueryResult) => {
   const id = parse.array({ value: result.rows }).single().object().property('id').number().greaterThanZero();
-  if (id.error) return { error: id.error };
+  if (id.error) return { error: fail(id.error) };
 
   return { id: id.value };
 };
 
 export const updateEventRequest = (req: Request) => {
   const id = parse.number({ value: Number(req.params.id) }).greaterThanZero();
-  if (id.error) return { error: id.error };
+  if (id.error) return { error: fail(id.error) };
 
   const body = parse.object({ value: req.body });
 
   const name = body.property('name').string().nonEmpty();
-  if (name.error) return { error: name.error };
+  if (name.error) return { error: fail(name.error) };
 
   const date = body.property('date').string().date();
-  if (date.error) return { error: date.error };
+  if (date.error) return { error: fail(date.error) };
 
   return { event: { id: id.value, name: name.value, date: date.value } };
 };
 
 export const deleteEventRequest = (req: Request) => {
   const id = parse.number({ value: Number(req.params.id) }).greaterThanZero();
-  if (id.error) return { error: id.error };
+  if (id.error) return { error: fail(id.error) };
 
   return { id:id.value };
 };

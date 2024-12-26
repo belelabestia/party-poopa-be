@@ -19,7 +19,7 @@ export const loginRequest = (req: Request) => {
 
 export const loginResult = (result: QueryResult) => {
   const rows = parse.array({ value: result.rows });
-  if (rows.value?.length === 0) return { unauthorized: fail() };
+  if (rows.value?.length === 0) return { unauthorized: Symbol() };
 
   const password_hash = parse.single(rows).object().property('password_hash').string().nonEmpty();
   if (password_hash.error) return { error: fail(password_hash.error) };

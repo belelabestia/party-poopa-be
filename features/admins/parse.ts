@@ -3,7 +3,7 @@ import * as parse from '$/parse';
 import { Request } from '$/server';
 import { QueryResult } from 'pg';
 
-const fail = makeFail('parse error');
+const fail = makeFail('admins parse error');
 
 export const getAllAdminsResult = (result: QueryResult) => {
   const admins = [];

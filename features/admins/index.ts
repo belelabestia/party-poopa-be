@@ -1,11 +1,11 @@
-import * as rsp from '$/respond';
-import * as db from '$/db';
-import * as parse from './parse';
-import * as sql from './sql';
 import { hash } from 'bcryptjs';
 import { Express } from 'express';
 import { Request, Response } from '$/server';
 import { authenticate } from '$/auth';
+import * as rsp from '$/respond';
+import * as db from '$/db';
+import * as parse from './parse';
+import * as sql from './sql';
 
 const getAllAdmins = async (req: Request, res: Response) => {
   console.log('hit endpoint', getAllAdmins.name);
@@ -13,21 +13,21 @@ const getAllAdmins = async (req: Request, res: Response) => {
 
   try {
     const auth = await authenticate(req);
-    if (auth.error !== undefined) {
+    if (auth.error) {
       console.error('authentication failed', auth.error);
       respond.unauthorized('invalid token');
       return;
     }
 
     const query = await db.query(sql.getAllAdmins);
-    if (query.error !== undefined) {
+    if (query.error) {
       console.error('getting all admins from db failed', query.error);
       respond.internalServerError();
       return;
     }
 
     const parsed = parse.getAllAdminsResult(query.result);
-    if (parsed.error !== undefined) {
+    if (parsed.error) {
       console.error('parsing admins from db failed', parsed.error);
       respond.internalServerError();
       return;
@@ -48,16 +48,16 @@ const createAdmin = async (req: Request, res: Response) => {
 
   try {
     const auth = await authenticate(req);
-    if (auth.error !== undefined) {
+    if (auth.error) {
       console.error('authentication failed', auth.error);
       respond.unauthorized('invalid token');
       return;
     }
 
     const request = parse.createAdminRequest(req);
-    if (request.error !== undefined) {
+    if (request.error) {
       console.error('error parsing request', request.error);
-      respond.badRequest(request.error);
+      respond.badRequest(request.error.name);
       return;
     }
 
@@ -72,14 +72,14 @@ const createAdmin = async (req: Request, res: Response) => {
       return;
     }
 
-    if (query.error !== undefined) {
+    if (query.error) {
       console.error('creating admin on db failed', query.error);
       respond.internalServerError();
       return;
     }
 
     const parsed = parse.createAdminResult(query.result);
-    if (parsed.error !== undefined) {
+    if (parsed.error) {
       console.error('error creating admin on db', parsed.error);
       respond.internalServerError();
       return;
@@ -100,16 +100,16 @@ const updateAdminUsername = async (req: Request, res: Response) => {
 
   try {
     const auth = await authenticate(req);
-    if (auth.error !== undefined) {
+    if (auth.error) {
       console.error('authentication failed', auth.error);
       respond.unauthorized('');
       return;
     }
 
     const request = parse.updateAdminUsernameRequest(req);
-    if (request.error !== undefined) {
+    if (request.error) {
       console.error('error parsing request', request.error);
-      respond.badRequest(request.error);
+      respond.badRequest(request.error.name);
       return;
     }
 
@@ -124,7 +124,7 @@ const updateAdminUsername = async (req: Request, res: Response) => {
       return;
     }
 
-    if (query.error !== undefined) {
+    if (query.error) {
       console.error('updating admin on db failed', query.error);
       respond.internalServerError();
       return;
@@ -145,16 +145,16 @@ const updateAdminPassword = async (req: Request, res: Response) => {
 
   try {
     const auth = await authenticate(req);
-    if (auth.error !== undefined) {
+    if (auth.error) {
       console.error('authentication failed', auth.error);
       respond.unauthorized('');
       return;
     }
 
     const request = parse.updateAdminPasswordRequest(req);
-    if (request.error !== undefined) {
+    if (request.error) {
       console.error('error parsing request', request.error);
-      respond.badRequest(request.error);
+      respond.badRequest(request.error.name);
       return;
     }
 
@@ -162,7 +162,7 @@ const updateAdminPassword = async (req: Request, res: Response) => {
 
     const hashed = await hash(password, 10);
     const query = await db.query(sql.updateAdminPassword, [id, hashed]);
-    if (query.error !== undefined) {
+    if (query.error) {
       console.error('updating admin on db failed', query.error);
       respond.internalServerError();
       return;
@@ -183,7 +183,7 @@ const deleteAdmin = async (req: Request, res: Response) => {
 
   try {
     const auth = await authenticate(req);
-    if (auth.error !== undefined) {
+    if (auth.error) {
       console.error('authentication failed', auth.error);
       respond.unauthorized('');
       return;
@@ -191,16 +191,16 @@ const deleteAdmin = async (req: Request, res: Response) => {
 
 
     const request = parse.deleteAdminRequest(req);
-    if (request.error !== undefined) {
+    if (request.error) {
       console.error('error parsing request', request.error);
-      respond.badRequest(request.error);
+      respond.badRequest(request.error.name);
       return;
     }
 
     const { id } = request;
 
     const query = await db.query(sql.deleteAdmin, [id]);
-    if (query.error !== undefined) {
+    if (query.error) {
       console.error('updating admin on db failed', query.error);
       respond.internalServerError();
       return;

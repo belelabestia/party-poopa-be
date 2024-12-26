@@ -12,21 +12,21 @@ const getAllEvents = async (req: Request, res: Response) => {
 
   try {
     const auth = await authenticate(req);
-    if (auth.error !== undefined) {
+    if (auth.error) {
       console.error('authentication failed', auth.error);
       respond.unauthorized('invalid token');
       return;
     }
 
     const query = await db.query(sql.getAllEvents);
-    if (query.error !== undefined) {
+    if (query.error) {
       console.error('getting all events from db failed', query.error);
       respond.internalServerError();
       return;
     }
 
     const parsed = parse.getAllEventsResult(query.result);
-    if (parsed.error !== undefined) {
+    if (parsed.error) {
       console.error('parsing events from db failed', parsed.error);
       respond.internalServerError();
       return;
@@ -47,30 +47,30 @@ const createEvent = async (req: Request, res: Response) => {
 
   try {
     const auth = await authenticate(req);
-    if (auth.error !== undefined) {
+    if (auth.error) {
       console.error('authentication failed', auth.error);
       respond.unauthorized('invalid token');
       return;
     }
 
     const request = parse.createEventRequest(req);
-    if (request.error !== undefined) {
+    if (request.error) {
       console.error('parsing request failed', request.error);
-      respond.badRequest(request.error);
+      respond.badRequest(request.error.name);
       return;
     }
 
     const { name, date } = request.event;
 
     const query = await db.query(sql.createEvent, [name, date]);
-    if (query.error !== undefined) {
+    if (query.error) {
       console.error('creating event on db failed', query.error);
       respond.internalServerError();
       return;
     }
 
     const parsed = parse.createEventResult(query.result);
-    if (parsed.error !== undefined) {
+    if (parsed.error) {
       console.error('creating event on db failed', parsed.error);
       respond.internalServerError();
       return;
@@ -91,23 +91,23 @@ const updateEvent = async (req: Request, res: Response) => {
 
   try {
     const auth = await authenticate(req);
-    if (auth.error !== undefined) {
+    if (auth.error) {
       console.error('authentication failed', auth.error);
       respond.unauthorized('');
       return;
     }
 
     const request = parse.updateEventRequest(req);
-    if (request.error !== undefined) {
+    if (request.error) {
       console.error('error parsing request', request.error);
-      respond.badRequest(request.error);
+      respond.badRequest(request.error.name);
       return;
     }
 
     const { id, name, date } = request.event;
 
     const query = await db.query(sql.updateEvent, [id, name, date]);
-    if (query.error !== undefined) {
+    if (query.error) {
       console.error('updating event on db failed', query.error);
       respond.internalServerError();
       return;
@@ -128,23 +128,23 @@ const deleteEvent = async (req: Request, res: Response) => {
 
   try {
     const auth = await authenticate(req);
-    if (auth.error !== undefined) {
+    if (auth.error) {
       console.error('authentication failed', auth.error);
       respond.unauthorized('');
       return;
     }
 
     const request = parse.deleteEventRequest(req);
-    if (request.error !== undefined) {
+    if (request.error) {
       console.error('error parsing request', request.error);
-      respond.badRequest(request.error);
+      respond.badRequest(request.error.name);
       return;
     }
 
     const { id } = request;
 
     const query = await db.query(sql.deleteEvent, [id]);
-    if (query.error !== undefined) {
+    if (query.error) {
       console.error('updating event on db failed', query.error);
       respond.internalServerError();
       return;

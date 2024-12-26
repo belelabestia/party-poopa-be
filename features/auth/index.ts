@@ -19,16 +19,16 @@ const login = async (req: Request, res: Response & Cookie) => {
 
   try {
     const request = parse.loginRequest(req);
-    if (request.error !== undefined) {
+    if (request.error) {
       console.error('admin login failed', request.error);
-      respond.badRequest(request.error);
+      respond.badRequest(request.error.name);
       return;
     }
 
     const { username, password } = request.admin;
 
     const query = await db.query(sql.getAdminByUsername, [username]);
-    if (query.error !== undefined) {
+    if (query.error) {
       console.error('admin login failed', query.error);
       respond.internalServerError();
       return;
@@ -41,7 +41,7 @@ const login = async (req: Request, res: Response & Cookie) => {
       return;
     }
 
-    if (parsed.error !== undefined) {
+    if (parsed.error) {
       console.error('error creating admin on db', parsed.error);
       respond.internalServerError();
       return;

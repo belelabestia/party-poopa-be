@@ -1,9 +1,8 @@
 import { isDateString } from './date';
 import { makeFail, Error } from './error';
+import { Union } from './union';
 
-type ParseResult<T> =
-  | { error: Error, value?: undefined }
-  | { value: T, error?: undefined };
+type ParseResult<T> = Union<{ error: Error, value: T }>;
 
 const fail = makeFail('parse error');
 
@@ -27,7 +26,7 @@ export const property = ({ error, value }: ParseResult<object>, key: string) => 
   });
 
   if (error) return make({ error });
-  if (key in value === false) return make({ error: fail('missing property') });
+  if (key in value === false) return make({ error: fail(`missing property ${key}`) });
 
   return make({ value: (value as Record<string, unknown>)[key] });
 };

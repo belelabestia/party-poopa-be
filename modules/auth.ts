@@ -2,13 +2,11 @@ import { verify } from 'jsonwebtoken';
 import { jwt } from 'config';
 import { Request } from '$/server';
 import { Error, makeFail } from './error';
+import { Union } from './union';
 import * as parse from '$/parse';
 
 type Admin = { username: string };
-
-type JwtResult =
-  | { error: Error, value?: undefined }
-  | { value: Admin, error?: undefined };
+type JwtResult = Union<{ error: Error, value: Admin }>;
 
 const fail = makeFail('auth error');
 

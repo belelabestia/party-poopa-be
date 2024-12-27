@@ -11,10 +11,10 @@ export const getAllAdminsResult = (result: QueryResult) => {
   for (let i = 0; i < result.rows.length; i++) {
     const row = parse.object({ value: result.rows[i] });
 
-    const id = row.property('id').number().greaterThanZero();
+    const id = row.property('id').defined().number().greaterThanZero();
     if (id.error) return { error: fail(id.error) };
 
-    const username = row.property('username').string().nonEmpty();
+    const username = row.property('username').defined().string().nonEmpty();
     if (username.error) return { error: fail(username.error) };
 
     admins.push({ id: id.value, username: username.value });
@@ -26,17 +26,17 @@ export const getAllAdminsResult = (result: QueryResult) => {
 export const createAdminRequest = (req: Request) => {
   const body = parse.object({ value: req.body });
 
-  const username = body.property('username').string().nonEmpty();
+  const username = body.property('username').defined().string().nonEmpty();
   if (username.error) return { error: fail(username.error) };
 
-  const password = body.property('password').string().nonEmpty();
+  const password = body.property('password').defined().string().nonEmpty();
   if (password.error) return { error: fail(password.error) };
 
   return { result: { username: username.value, password: password.value } };
 };
 
 export const createAdminResult = (result: QueryResult) => {
-  const id = parse.array({ value: result.rows }).single().object().property('id').number().greaterThanZero();
+  const id = parse.array({ value: result.rows }).single().object().property('id').defined().number().greaterThanZero();
   if (id.error) return { error: fail(id.error) };
 
   return { id: id.value };
@@ -46,7 +46,7 @@ export const updateAdminUsernameRequest = (req: Request) => {
   const id = parse.number({ value: Number(req.params.id) }).greaterThanZero();
   if (id.error) return { error: fail(id.error) };
 
-  const username = parse.object({ value: req.body }).property('username').string().nonEmpty();
+  const username = parse.object({ value: req.body }).property('username').defined().string().nonEmpty();
   if (username.error) return { error: fail(username.error) };
 
   return { admin: { id: id.value, username: username.value } };
@@ -56,7 +56,7 @@ export const updateAdminPasswordRequest = (req: Request) => {
   const id = parse.number({ value: Number(req.params.id) }).greaterThanZero();
   if (id.error) return { error: fail(id.error) };
 
-  const password = parse.object({ value: req.body }).property('password').string().nonEmpty();
+  const password = parse.object({ value: req.body }).property('password').defined().string().nonEmpty();
   if (password.error) return { error: fail(password.error) };
 
   return { admin: { id: id.value, password: password.value } };
@@ -69,4 +69,4 @@ export const deleteAdminRequest = (req: Request) => {
   return { id: id.value };
 };
 
-export const constraint = (x: unknown) => parse.object({ value: x }).property('constraint').string().nonEmpty();
+export const constraint = (x: unknown) => parse.object({ value: x }).property('constraint').defined().string().nonEmpty();

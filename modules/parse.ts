@@ -21,8 +21,7 @@ export const object = ({ error, value }: ParseResult<unknown>) => {
 export const property = ({ error, value }: ParseResult<object>, key: string) => {
   const make = (result: ParseResult<unknown>) => ({
     ...result,
-    number: () => number(result),
-    string: () => string(result)
+    defined: () => defined(result)
   });
 
   if (error) return make({ error });
@@ -30,6 +29,20 @@ export const property = ({ error, value }: ParseResult<object>, key: string) => 
 
   return make({ value: (value as Record<string, unknown>)[key] });
 };
+
+export const defined = ({ error, value }: ParseResult<unknown>) => {
+  const make = (result: ParseResult<{}>) => ({
+    ...result,
+    number: () => number(result),
+    string: () => string(result)
+  });
+
+  if (error) return make({ error });
+  if (value === null || value === undefined) return make({ error: fail('should be defined') });
+
+  return make({ value });
+};
+
 
 export const array = ({ error, value }: ParseResult<unknown>) => {
   const make = (result: ParseResult<unknown[]>) => ({

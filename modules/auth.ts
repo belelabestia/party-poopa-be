@@ -16,7 +16,7 @@ const verifyJwt = (token: string) => new Promise<JwtResult>(resolve => verify(to
     return;
   }
 
-  const username = parse.object({ value: decoded }).property('username').string().nonEmpty();
+  const username = parse.object({ value: decoded }).property('username').defined().string().nonEmpty();
 
   if (username.error) {
     resolve({ error: fail(username.error) });
@@ -27,7 +27,7 @@ const verifyJwt = (token: string) => new Promise<JwtResult>(resolve => verify(to
 }));
 
 export const authenticate = async (req: Request) => {
-  const token = parse.object({ value: req.cookies }).property('token').string().nonEmpty();
+  const token = parse.object({ value: req.cookies }).property('token').defined().string().nonEmpty();
   if (token.error) return { error: fail(token.error) };
 
   const admin = await verifyJwt(token.value);

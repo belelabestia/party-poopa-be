@@ -140,7 +140,7 @@ const updateAdminUsername = async (req: Request, res: Response) => {
 };
 
 const updateAdminPassword = async (req: Request, res: Response) => {
-  console.log('hit endpoint', updateAdminUsername.name);
+  console.log('hit endpoint', updateAdminPassword.name);
   const respond = rsp.init(res);
 
   try {

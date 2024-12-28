@@ -60,9 +60,9 @@ const createPerson = async (req: Request, res: Response) => {
       return;
     }
 
-    const { name, date } = request.person;
+    const { name } = request.person;
 
-    const query = await db.query(sql.createPerson, [name, date]);
+    const query = await db.query(sql.createPerson, [name]);
     if (query.error) {
       console.error('creating person on db failed', query.error);
       respond.internalServerError();
@@ -104,9 +104,9 @@ const updatePerson = async (req: Request, res: Response) => {
       return;
     }
 
-    const { id, name, date } = request.person;
+    const { id, name } = request.person;
 
-    const query = await db.query(sql.updatePerson, [id, name, date]);
+    const query = await db.query(sql.updatePerson, [id, name]);
     if (query.error) {
       console.error('updating person on db failed', query.error);
       respond.internalServerError();

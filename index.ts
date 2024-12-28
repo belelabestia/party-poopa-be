@@ -5,6 +5,7 @@ import { addMiddlewares } from '$/middleware';
 import { addHelloEndpoints } from '@/hello';
 import { addAdminEndpoints } from '@/admins';
 import { addEventEndpoints } from '@/events';
+import { addPersonEndpoints } from '@/people';
 
 const app = express();
 
@@ -13,4 +14,5 @@ addHelloEndpoints(app);
 addAuthEndpoints(app);
 addAdminEndpoints(app);
 addEventEndpoints(app);
+addPersonEndpoints(app);
 startServer(app);

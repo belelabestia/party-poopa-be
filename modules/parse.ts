@@ -34,7 +34,8 @@ export const defined = ({ error, value }: ParseResult<unknown>) => {
   const make = (result: ParseResult<{}>) => ({
     ...result,
     number: () => number(result),
-    string: () => string(result)
+    string: () => string(result),
+    date: () => dateFromObject(result)
   });
 
   if (error) return make({ error });
@@ -83,7 +84,7 @@ export const string = ({ error, value }: ParseResult<{}>) => {
   const make = (result: ParseResult<string>) => ({
     ...result,
     nonEmpty: () => nonEmpty(result),
-    date: () => date(result)
+    date: () => dateFromString(result)
   });
 
   if (error) return make({ error });
@@ -115,9 +116,16 @@ export const nonEmpty = ({ error, value }: ParseResult<string>) => {
 
 type Date = Branded<string, 'date'>;
 
-export const date = ({ error, value }: ParseResult<string>) => {
+export const dateFromString = ({ error, value }: ParseResult<string>) => {
   if (error) return { error };
   if (!isDateString(value)) return { error: fail('should be a date string (YYYY-MM-DD)') };
 
   return { value: value as Date };
+};
+
+export const dateFromObject = ({ error, value }: ParseResult<{}>) => {
+  if (error) return { error };
+  if (value instanceof global.Date === false || isNaN(value.getTime())) return { error: fail('should be a valid Date object') };
+
+  return { value: value.toISOString().slice(0, 10) };
 };

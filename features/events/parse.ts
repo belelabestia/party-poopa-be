@@ -24,8 +24,7 @@ export const getAllEventsResult = (result: QueryResult) => {
       continue;
     }
 
-    // todofix: dateProp.value is Date and must be parsed into a datestring
-    const date = dateProp.string().date();
+    const date = dateProp.date();
     if (date.error) return { error: fail(date.error) };
 
     events.push({ id: id.value, name: name.value, date: date.value });

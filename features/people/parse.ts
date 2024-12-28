@@ -3,10 +3,10 @@ import { Request } from '$/server';
 import { QueryResult } from 'pg';
 import * as parse from '$/parse';
 
-const fail = makeFail('events parse error');
+const fail = makeFail('people parse error');
 
-export const getAllEventsResult = (result: QueryResult) => {
-  const events = [];
+export const getAllPeopleResult = (result: QueryResult) => {
+  const people = [];
 
   for (let i = 0; i < result.rows.length; i++) {
     const row = parse.object({ value: result.rows[i] });
@@ -19,42 +19,43 @@ export const getAllEventsResult = (result: QueryResult) => {
 
     const dateProp = row.property('date').defined();
     if (dateProp.error) {
-      events.push({ id: id.value, name: name.value });
+      people.push({ id: id.value, name: name.value });
       continue;
     }
 
     const date = dateProp.date();
     if (date.error) return { error: fail(date.error) };
 
-    events.push({ id: id.value, name: name.value, date: date.value });
+    people.push({ id: id.value, name: name.value, date: date.value });
   }
 
-  return { events };
+  return { people };
 };
 
-export const createEventRequest = (req: Request) => {
+export const createPersonRequest = (req: Request) => {
   const body = parse.object({ value: req.body });
 
   const name = body.property('name').defined().string().nonEmpty();
   if (name.error) return { error: fail(name.error) };
 
   const dateProp = body.property('date');
-  if (dateProp.error) return { event: { name: name.value } };
+
+  if (dateProp.error) return { person: { name: name.value } };
 
   const date = dateProp.defined().string().date();
   if (date.error) return { error: fail(date.error) };
 
-  return { event: { name: name.value, date: date.value } };
+  return { person: { name: name.value, date: date.value } };
 };
 
-export const createEventResult = (result: QueryResult) => {
+export const createPersonResult = (result: QueryResult) => {
   const id = parse.array({ value: result.rows }).single().object().property('id').defined().number().greaterThanZero();
   if (id.error) return { error: fail(id.error) };
 
   return { id: id.value };
 };
 
-export const updateEventRequest = (req: Request) => {
+export const updatePersonRequest = (req: Request) => {
   const id = parse.number({ value: Number(req.params.id) }).greaterThanZero();
   if (id.error) return { error: fail(id.error) };
 
@@ -66,10 +67,10 @@ export const updateEventRequest = (req: Request) => {
   const date = body.property('date').defined().string().date();
   if (date.error) return { error: fail(date.error) };
 
-  return { event: { id: id.value, name: name.value, date: date.value } };
+  return { person: { id: id.value, name: name.value, date: date.value } };
 };
 
-export const deleteEventRequest = (req: Request) => {
+export const deletePersonRequest = (req: Request) => {
   const id = parse.number({ value: Number(req.params.id) }).greaterThanZero();
   if (id.error) return { error: fail(id.error) };
 

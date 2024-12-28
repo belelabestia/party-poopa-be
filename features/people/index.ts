@@ -6,8 +6,8 @@ import * as sql from './sql';
 import * as parse from './parse';
 import * as db from '$/db';
 
-const getAllEvents = async (req: Request, res: Response) => {
-  console.log('hit endpoint', getAllEvents.name);
+const getAllPeople = async (req: Request, res: Response) => {
+  console.log('hit endpoint', getAllPeople.name);
   const respond = rsp.init(res);
 
   try {
@@ -18,31 +18,31 @@ const getAllEvents = async (req: Request, res: Response) => {
       return;
     }
 
-    const query = await db.query(sql.getAllEvents);
+    const query = await db.query(sql.getAllPeople);
     if (query.error) {
-      console.error('getting all events from db failed', query.error);
+      console.error('getting all people from db failed', query.error);
       respond.internalServerError();
       return;
     }
 
-    const parsed = parse.getAllEventsResult(query.result);
+    const parsed = parse.getAllPeopleResult(query.result);
     if (parsed.error) {
-      console.error('parsing events from db failed', parsed.error);
+      console.error('parsing people from db failed', parsed.error);
       respond.internalServerError();
       return;
     }
 
-    console.log('got all events');
-    respond.ok(parsed.events);
+    console.log('got all people');
+    respond.ok(parsed.people);
   }
   catch (error) {
-    console.error('error getting events', error);
+    console.error('error getting people', error);
     respond.internalServerError();
   }
 };
 
-const createEvent = async (req: Request, res: Response) => {
-  console.log('hit endpoint', createEvent.name);
+const createPerson = async (req: Request, res: Response) => {
+  console.log('hit endpoint', createPerson.name);
   const respond = rsp.init(res);
 
   try {
@@ -53,40 +53,40 @@ const createEvent = async (req: Request, res: Response) => {
       return;
     }
 
-    const request = parse.createEventRequest(req);
+    const request = parse.createPersonRequest(req);
     if (request.error) {
       console.error('parsing request failed', request.error);
       respond.badRequest(request.error.name);
       return;
     }
 
-    const { name, date } = request.event;
+    const { name, date } = request.person;
 
-    const query = await db.query(sql.createEvent, [name, date]);
+    const query = await db.query(sql.createPerson, [name, date]);
     if (query.error) {
-      console.error('creating event on db failed', query.error);
+      console.error('creating person on db failed', query.error);
       respond.internalServerError();
       return;
     }
 
-    const parsed = parse.createEventResult(query.result);
+    const parsed = parse.createPersonResult(query.result);
     if (parsed.error) {
-      console.error('creating event on db failed', parsed.error);
+      console.error('creating person on db failed', parsed.error);
       respond.internalServerError();
       return;
     }
 
-    console.log('event created successfully', { name });
+    console.log('person created successfully', { name });
     respond.ok({ id: parsed.id });
   }
   catch (error) {
-    console.error('error creating event', error);
+    console.error('error creating person', error);
     respond.internalServerError();
   }
 };
 
-const updateEvent = async (req: Request, res: Response) => {
-  console.log('hit endpoint', updateEvent.name);
+const updatePerson = async (req: Request, res: Response) => {
+  console.log('hit endpoint', updatePerson.name);
   const respond = rsp.init(res);
 
   try {
@@ -97,33 +97,33 @@ const updateEvent = async (req: Request, res: Response) => {
       return;
     }
 
-    const request = parse.updateEventRequest(req);
+    const request = parse.updatePersonRequest(req);
     if (request.error) {
       console.error('error parsing request', request.error);
       respond.badRequest(request.error.name);
       return;
     }
 
-    const { id, name, date } = request.event;
+    const { id, name, date } = request.person;
 
-    const query = await db.query(sql.updateEvent, [id, name, date]);
+    const query = await db.query(sql.updatePerson, [id, name, date]);
     if (query.error) {
-      console.error('updating event on db failed', query.error);
+      console.error('updating person on db failed', query.error);
       respond.internalServerError();
       return;
     }
 
-    console.log('updated event', { name });
+    console.log('updated person', { name });
     respond.noContent();
   }
   catch (error) {
-    console.error('updating event failed', error);
+    console.error('updating person failed', error);
     respond.internalServerError();
   }
 };
 
-const deleteEvent = async (req: Request, res: Response) => {
-  console.log('hit endpoint', deleteEvent.name);
+const deletePerson = async (req: Request, res: Response) => {
+  console.log('hit endpoint', deletePerson.name);
   const respond = rsp.init(res);
 
   try {
@@ -134,7 +134,7 @@ const deleteEvent = async (req: Request, res: Response) => {
       return;
     }
 
-    const request = parse.deleteEventRequest(req);
+    const request = parse.deletePersonRequest(req);
     if (request.error) {
       console.error('error parsing request', request.error);
       respond.badRequest(request.error.name);
@@ -143,25 +143,25 @@ const deleteEvent = async (req: Request, res: Response) => {
 
     const { id } = request;
 
-    const query = await db.query(sql.deleteEvent, [id]);
+    const query = await db.query(sql.deletePerson, [id]);
     if (query.error) {
-      console.error('updating event on db failed', query.error);
+      console.error('updating person on db failed', query.error);
       respond.internalServerError();
       return;
     }
 
-    console.log('deleted event', { id });
+    console.log('deleted person', { id });
     respond.noContent();
   }
   catch (error) {
-    console.error('deleting event failed', error);
+    console.error('deleting person failed', error);
     respond.internalServerError();
   }
 };
 
-export const addEventEndpoints = (app: Express) => {
-  app.get('/events', getAllEvents);
-  app.post('/event', createEvent);
-  app.put('/event/:id', updateEvent);
-  app.delete('/event/:id', deleteEvent);
+export const addPersonEndpoints = (app: Express) => {
+  app.get('/people', getAllPeople);
+  app.post('/person', createPerson);
+  app.put('/person/:id', updatePerson);
+  app.delete('/person/:id', deletePerson);
 };

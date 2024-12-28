@@ -43,7 +43,6 @@ export const defined = ({ error, value }: ParseResult<unknown>) => {
   return make({ value });
 };
 
-
 export const array = ({ error, value }: ParseResult<unknown>) => {
   const make = (result: ParseResult<unknown[]>) => ({
     ...result,
@@ -68,7 +67,7 @@ export const single = ({ error, value }: ParseResult<unknown[]>) => {
   return make({ value: value[0] });
 };
 
-export const number = ({ error, value }: ParseResult<unknown>) => {
+export const number = ({ error, value }: ParseResult<{}>) => {
   const make = (result: ParseResult<number>) => ({
     ...result,
     greaterThanZero: () => greaterThanZero(result)
@@ -80,7 +79,7 @@ export const number = ({ error, value }: ParseResult<unknown>) => {
   return make({ value });
 };
 
-export const string = ({ error, value }: ParseResult<unknown>) => {
+export const string = ({ error, value }: ParseResult<{}>) => {
   const make = (result: ParseResult<string>) => ({
     ...result,
     nonEmpty: () => nonEmpty(result),

@@ -1,6 +1,6 @@
 import { Pool } from 'pg';
-import * as config from 'config';
 import { makeFail } from './error';
+import * as config from 'config';
 
 const fail = makeFail('db error');
 

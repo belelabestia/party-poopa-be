@@ -18,15 +18,19 @@ export const getAllEventsResult = (result: QueryResult) => {
     if (name.error) return { error: fail(name.error) };
 
     const dateProp = row.property('date').defined();
-    if (dateProp.error) {
-      events.push({ id: id.value, name: name.value });
-      continue;
-    }
+    const date = dateProp.error ? null : dateProp.date();
+    if (date?.error) return { error: fail(date.error) };
 
-    const date = dateProp.date();
-    if (date.error) return { error: fail(date.error) };
+    const peopleProp = row.property('people').defined();
+    const people = peopleProp.error ? null : peopleProp.array();
+    if (people?.error) return { error: fail(people.error) };
 
-    events.push({ id: id.value, name: name.value, date: date.value });
+    // todo
+    // for (let i = 0; i < (people?.value.length ?? 0); i++) {
+    //   const id = parse.
+    // }
+
+    events.push({ id: id.value, name: name.value, date: date?.value, people: people?.value });
   }
 
   return { events };

@@ -35,7 +35,8 @@ export const defined = ({ error, value }: ParseResult<unknown>) => {
     ...result,
     number: () => number(result),
     string: () => string(result),
-    date: () => dateFromObject(result)
+    date: () => dateFromObject(result),
+    array: () => array(result)
   });
 
   if (error) return make({ error });
@@ -44,7 +45,7 @@ export const defined = ({ error, value }: ParseResult<unknown>) => {
   return make({ value });
 };
 
-export const array = ({ error, value }: ParseResult<unknown>) => {
+export const array = ({ error, value }: ParseResult<{}>) => {
   const make = (result: ParseResult<unknown[]>) => ({
     ...result,
     single: () => single(result)

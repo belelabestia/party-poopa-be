@@ -11,7 +11,7 @@ export const getAllAdminsResult = (result: QueryResult) => {
   for (let i = 0; i < result.rows.length; i++) {
     const row = parse.object({ value: result.rows[i] });
 
-    const id = row.property('id').defined().number().greaterThanZero();
+    const id = row.property('id').defined().number().positive();
     if (id.error) return { error: fail(id.error) };
 
     const username = row.property('username').defined().string().nonEmpty();
@@ -36,14 +36,14 @@ export const createAdminRequest = (req: Request) => {
 };
 
 export const createAdminResult = (result: QueryResult) => {
-  const id = parse.array({ value: result.rows }).single().object().property('id').defined().number().greaterThanZero();
+  const id = parse.array({ value: result.rows }).single().object().property('id').defined().number().positive();
   if (id.error) return { error: fail(id.error) };
 
   return { id: id.value };
 };
 
 export const updateAdminUsernameRequest = (req: Request) => {
-  const id = parse.number({ value: Number(req.params.id) }).greaterThanZero();
+  const id = parse.number({ value: Number(req.params.id) }).positive();
   if (id.error) return { error: fail(id.error) };
 
   const username = parse.object({ value: req.body }).property('username').defined().string().nonEmpty();
@@ -53,7 +53,7 @@ export const updateAdminUsernameRequest = (req: Request) => {
 };
 
 export const updateAdminPasswordRequest = (req: Request) => {
-  const id = parse.number({ value: Number(req.params.id) }).greaterThanZero();
+  const id = parse.number({ value: Number(req.params.id) }).positive();
   if (id.error) return { error: fail(id.error) };
 
   const password = parse.object({ value: req.body }).property('password').defined().string().nonEmpty();
@@ -63,7 +63,7 @@ export const updateAdminPasswordRequest = (req: Request) => {
 };
 
 export const deleteAdminRequest = (req: Request) => {
-  const id = parse.number({ value: Number(req.params.id) }).greaterThanZero();
+  const id = parse.number({ value: Number(req.params.id) }).positive();
   if (id.error) return { error: fail(id.error) };
 
   return { id: id.value };

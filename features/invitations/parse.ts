@@ -18,14 +18,14 @@ export const createInvitationRequest = (req: Request) => {
 };
 
 export const createInvitationResult = (result: QueryResult) => {
-  const id = parse.array({ value: result.rows }).single().object().property('id').defined().number().greaterThanZero();
+  const id = parse.array({ value: result.rows }).single().object().property('id').defined().number().positive();
   if (id.error) return { error: fail(id.error) };
 
   return { id: id.value };
 };
 
 export const deleteInvitationRequest = (req: Request) => {
-  const id = parse.number({ value: Number(req.params.id) }).greaterThanZero();
+  const id = parse.number({ value: Number(req.params.id) }).positive();
   if (id.error) return { error: fail(id.error) };
 
   return { id: id.value };

@@ -11,7 +11,7 @@ export const getAllPeopleResult = (result: QueryResult) => {
   for (let i = 0; i < result.rows.length; i++) {
     const row = parse.object({ value: result.rows[i] });
 
-    const id = row.property('id').defined().number().greaterThanZero();
+    const id = row.property('id').defined().number().positive();
     if (id.error) return { error: fail(id.error) };
 
     const name = row.property('name').defined().string().nonEmpty();
@@ -33,14 +33,14 @@ export const createPersonRequest = (req: Request) => {
 };
 
 export const createPersonResult = (result: QueryResult) => {
-  const id = parse.array({ value: result.rows }).single().object().property('id').defined().number().greaterThanZero();
+  const id = parse.array({ value: result.rows }).single().object().property('id').defined().number().positive();
   if (id.error) return { error: fail(id.error) };
 
   return { id: id.value };
 };
 
 export const updatePersonRequest = (req: Request) => {
-  const id = parse.number({ value: Number(req.params.id) }).greaterThanZero();
+  const id = parse.number({ value: Number(req.params.id) }).positive();
   if (id.error) return { error: fail(id.error) };
 
   const body = parse.object({ value: req.body });
@@ -52,7 +52,7 @@ export const updatePersonRequest = (req: Request) => {
 };
 
 export const deletePersonRequest = (req: Request) => {
-  const id = parse.number({ value: Number(req.params.id) }).greaterThanZero();
+  const id = parse.number({ value: Number(req.params.id) }).positive();
   if (id.error) return { error: fail(id.error) };
 
   return { id: id.value };

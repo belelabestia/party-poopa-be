@@ -11,11 +11,13 @@ export const getAllEventsResult = (result: QueryResult) => {
   for (let i = 0; i < result.rows.length; i++) {
     const row = parse.object({ value: result.rows[i] });
 
-    const id = row.property('id').defined().number().greaterThanZero();
+    const id = row.property('id').defined().number().positive();
     if (id.error) return { error: fail(id.error) };
 
     const name = row.property('name').defined().string().nonEmpty();
     if (name.error) return { error: fail(name.error) };
+
+    const _date = row.property('date');
 
     const dateProp = row.property('date').defined();
     const date = dateProp.error ? null : dateProp.date();
@@ -24,11 +26,6 @@ export const getAllEventsResult = (result: QueryResult) => {
     const peopleProp = row.property('people').defined();
     const people = peopleProp.error ? null : peopleProp.array();
     if (people?.error) return { error: fail(people.error) };
-
-    // todo
-    // for (let i = 0; i < (people?.value.length ?? 0); i++) {
-    //   const id = parse.
-    // }
 
     events.push({ id: id.value, name: name.value, date: date?.value, people: people?.value });
   }
@@ -52,14 +49,14 @@ export const createEventRequest = (req: Request) => {
 };
 
 export const createEventResult = (result: QueryResult) => {
-  const id = parse.array({ value: result.rows }).single().object().property('id').defined().number().greaterThanZero();
+  const id = parse.array({ value: result.rows }).single().object().property('id').defined().number().positive();
   if (id.error) return { error: fail(id.error) };
 
   return { id: id.value };
 };
 
 export const updateEventRequest = (req: Request) => {
-  const id = parse.number({ value: Number(req.params.id) }).greaterThanZero();
+  const id = parse.number({ value: Number(req.params.id) }).positive();
   if (id.error) return { error: fail(id.error) };
 
   const body = parse.object({ value: req.body });
@@ -74,7 +71,7 @@ export const updateEventRequest = (req: Request) => {
 };
 
 export const deleteEventRequest = (req: Request) => {
-  const id = parse.number({ value: Number(req.params.id) }).greaterThanZero();
+  const id = parse.number({ value: Number(req.params.id) }).positive();
   if (id.error) return { error: fail(id.error) };
 
   return { id: id.value };

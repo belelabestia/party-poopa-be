@@ -18,6 +18,31 @@ export const object = ({ error, value }: ParseResult<unknown>) => {
   return make({ value });
 };
 
+type PropertyMap = { [key: string]: ParseResult<unknown> };
+
+export const properties = <T extends PropertyMap>(map: T) => {
+  for (const k in map) {}
+
+  const entries = Object.entries(map) as [Extract<keyof T, string>, T[keyof T]][];
+  const ref = {} as { [key: Extract<keyof T, string>]: T[keyof T] };
+
+  const make = (result: ParseResult<Record<string, unknown>>) => ({
+    ...result,
+    defined: () => defined(result)
+  });
+
+  for (let i = 0; i < entries.length; i++) {
+    const [key, value] = entries[i];
+
+    ref[key] = value.error ?? 
+
+    if (value.error) ref[key] = value.error;
+    else ref[key] = value.value;
+  }
+
+  return ref;
+};
+
 export const property = ({ error, value }: ParseResult<object>, key: string) => {
   const make = (result: ParseResult<unknown>) => ({
     ...result,
@@ -72,7 +97,7 @@ export const single = ({ error, value }: ParseResult<unknown[]>) => {
 export const number = ({ error, value }: ParseResult<{}>) => {
   const make = (result: ParseResult<number>) => ({
     ...result,
-    greaterThanZero: () => greaterThanZero(result)
+    positive: () => positive(result)
   });
 
   if (error) return make({ error });
@@ -97,13 +122,13 @@ export const string = ({ error, value }: ParseResult<{}>) => {
 declare const brand: unique symbol;
 type Branded<T, K extends string> = T & { [brand]: K };
 
-type GreaterThanZero = Branded<number, 'greater than zero'>;
+type Positive = Branded<number, 'greater than zero'>;
 
-export const greaterThanZero = ({ error, value }: ParseResult<number>) => {
+export const positive = ({ error, value }: ParseResult<number>) => {
   if (error) return { error };
   if (value < 1) return { error: fail('should be greater than zero') };
 
-  return { value: value as GreaterThanZero };
+  return { value: value as Positive };
 };
 
 type NonEmpty = Branded<string, 'non empty'>;
@@ -130,3 +155,4 @@ export const dateFromObject = ({ error, value }: ParseResult<{}>) => {
 
   return { value: value.toISOString().slice(0, 10) };
 };
+
